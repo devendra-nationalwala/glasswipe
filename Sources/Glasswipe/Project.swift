@@ -6,6 +6,8 @@ enum Project {
     static let repository = URL(string: "https://github.com/devendra-nationalwala/glasswipe")!
     static let issues = repository.appendingPathComponent("issues/new")
     static let releases = repository.appendingPathComponent("releases")
+    /// Stripe Payment Link where the donor chooses the amount. Forks replace or remove it.
+    static let donate = URL(string: "https://donate.stripe.com/4gMdRa8GPapX8oSgoO8og01")!
 
     static var version: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev"
@@ -13,6 +15,9 @@ enum Project {
 
     /// Opens the repository page, where the Star button is. Starring needs the user's GitHub sign-in in the browser.
     @MainActor static func star() { NSWorkspace.shared.open(repository) }
+
+    /// Opens the donation page in the browser. Stripe handles the payment; the app never sees it.
+    @MainActor static func buyCoffee() { NSWorkspace.shared.open(donate) }
 }
 
 /// "Star on GitHub" button used in the sidebar, menu bar and Settings.
@@ -28,5 +33,21 @@ struct StarButton: View {
             }
         }
         .help("Like Glasswipe? Star it on GitHub")
+    }
+}
+
+/// "Buy Me a Coffee" button used in the sidebar, menu bar and Settings.
+struct CoffeeButton: View {
+    var compact = false
+
+    var body: some View {
+        Button(action: Project.buyCoffee) {
+            if compact {
+                Image(systemName: "cup.and.saucer")
+            } else {
+                Label("Buy Me a Coffee", systemImage: "cup.and.saucer")
+            }
+        }
+        .help("Like Glasswipe? Buy the developer a coffee")
     }
 }

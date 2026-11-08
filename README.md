@@ -7,7 +7,7 @@ Clear out Junk, free up memory, and uninstall apps along with everything they le
 
 [**⬇ Download Glasswipe for macOS**](https://github.com/devendra-nationalwala/glasswipe/releases/latest/download/Glasswipe.dmg)
 
-macOS 26 (Tahoe) or later · Apple Silicon · [All releases](https://github.com/devendra-nationalwala/glasswipe/releases) · [MIT License](LICENSE)
+macOS 26 (Tahoe) or later · Apple Silicon · [All releases](https://github.com/devendra-nationalwala/glasswipe/releases) · [MIT License](LICENSE) · [☕ Buy me a coffee](https://donate.stripe.com/4gMdRa8GPapX8oSgoO8og01)
 
 ![Glasswipe overview](docs/screenshots/overview.png)
 
@@ -157,6 +157,8 @@ Quit it from the menu bar, then drag `/Applications/Glasswipe.app` to the Trash.
 ## Contributing
 
 If Glasswipe saved you some space, please ⭐ **star this repository**. There's a **Star on GitHub** button in the app's sidebar, menu bar panel and Help menu.
+
+Glasswipe is free and always will be. If you'd like to support it, you can [☕ **buy me a coffee**](https://donate.stripe.com/4gMdRa8GPapX8oSgoO8og01) (you choose the amount; payments go through Stripe). There's a **Buy Me a Coffee** button next to Star in the app. It only opens that page in your browser.
 
 Bug reports (Help → Report a Problem) and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) to build from source, run the tests and learn how the code is organised.
 

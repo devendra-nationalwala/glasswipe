@@ -80,6 +80,7 @@ struct SettingsView: View {
                 Section("Glasswipe") {
                     LabeledContent("Version", value: Project.version)
                     LabeledContent("Enjoying Glasswipe?") { StarButton() }
+                    LabeledContent("Want to support it?") { CoffeeButton() }
                     LabeledContent("Found a bug?") {
                         Button("Report a Problem") { NSWorkspace.shared.open(Project.issues) }
                     }
@@ -97,7 +98,7 @@ struct SettingsView: View {
             ExclusionsSettings()
                 .tabItem { Label("Exclusions", systemImage: "hand.raised") }
         }
-        .frame(width: 520, height: 480)
+        .frame(width: 520, height: 520)
     }
 }
 

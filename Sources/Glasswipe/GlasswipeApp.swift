@@ -35,6 +35,7 @@ struct GlasswipeApp: App {
             }
             CommandGroup(replacing: .help) {
                 Button("Star Glasswipe on GitHub…") { Project.star() }
+                Button("Buy Me a Coffee…") { Project.buyCoffee() }
                 Button("Report a Problem…") { NSWorkspace.shared.open(Project.issues) }
                 Button("Check for Updates…") { NSWorkspace.shared.open(Project.releases) }
                 Divider()
@@ -84,11 +85,14 @@ struct ContentView: View {
             }
             .navigationSplitViewColumnWidth(min: 200, ideal: 220)
             .safeAreaInset(edge: .bottom) {
-                StarButton()
-                    .buttonStyle(.glass)
-                    .controlSize(.small)
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, 12)
+                HStack(spacing: 8) {
+                    StarButton()
+                    CoffeeButton(compact: true)
+                }
+                .buttonStyle(.glass)
+                .controlSize(.small)
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 12)
             }
         } detail: {
             detail(for: model.selection ?? .overview)
@@ -148,6 +152,7 @@ struct MenuBarView: View {
                 Image(systemName: "sparkles").foregroundStyle(.tint)
                 Text("Glasswipe").font(.headline)
                 Spacer()
+                CoffeeButton(compact: true).buttonStyle(.borderless)
                 StarButton(compact: true).buttonStyle(.borderless)
             }
             HStack(spacing: 12) {

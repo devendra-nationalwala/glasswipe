@@ -29,6 +29,8 @@ cat > "$NOTES" <<NOTES
 3. Go to **System Settings → Privacy & Security**, click **Open Anyway**, and confirm (only once).
 4. In Glasswipe, click **Open Settings** on the banner and turn on **Full Disk Access**.
 
+Glasswipe is free. If it saved you some space, you can [☕ buy me a coffee](https://donate.stripe.com/4gMdRa8GPapX8oSgoO8og01).
+
 > [!CAUTION]
 > Glasswipe deletes files, moves files to the Trash, quits apps and changes startup settings. It is provided "as is", without warranty. The authors are **not responsible for any data loss or deleted files**. Review every selection before cleaning up and keep a current backup. See the [disclaimer](https://github.com/devendra-nationalwala/glasswipe#disclaimer).
 NOTES
