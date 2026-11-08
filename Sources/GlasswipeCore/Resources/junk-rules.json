@@ -1,0 +1,564 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "user-caches",
+      "title": "App caches",
+      "group": "system",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/*"
+      ],
+      "contentsOnly": true,
+      "skipRunningBundleIDs": true,
+      "ignore": [
+        "com.apple.*",
+        "Google",
+        "Firefox",
+        "BraveSoftware",
+        "Homebrew",
+        "pip",
+        "Yarn",
+        "pnpm",
+        "go-build",
+        "CocoaPods",
+        "ms-playwright",
+        "Cypress",
+        "com.microsoft.edgemac",
+        "com.operasoftware.Opera",
+        "company.thebrowser.Browser",
+        "CloudKit",
+        "FamilyCircle",
+        "GeoServices"
+      ],
+      "note": "Apps recreate their caches as needed."
+    },
+    {
+      "id": "sandboxed-caches",
+      "title": "Sandboxed app caches",
+      "group": "system",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Containers/*/Data/Library/Caches"
+      ],
+      "contentsOnly": true,
+      "ignore": [
+        "com.apple.*"
+      ],
+      "note": "Only the cache folder inside each container, never the container itself."
+    },
+    {
+      "id": "user-logs",
+      "title": "App logs",
+      "group": "system",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Logs/*"
+      ],
+      "contentsOnly": true,
+      "ignore": [
+        "Glasswipe",
+        "DiagnosticReports"
+      ]
+    },
+    {
+      "id": "crash-reports",
+      "title": "Crash reports older than 30 days",
+      "group": "system",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Logs/DiagnosticReports/*"
+      ],
+      "minAgeDays": 30
+    },
+    {
+      "id": "user-temp",
+      "title": "Temporary files older than 3 days",
+      "group": "system",
+      "tier": "caution",
+      "method": "delete",
+      "paths": [
+        "$TMPDIR/*"
+      ],
+      "minAgeDays": 3,
+      "note": "Running apps keep files here; only old items are offered."
+    },
+    {
+      "id": "trash",
+      "title": "Trash",
+      "group": "system",
+      "tier": "caution",
+      "method": "delete",
+      "paths": [
+        "~/.Trash"
+      ],
+      "contentsOnly": true,
+      "needsFullDiskAccess": true,
+      "note": "Emptying the Trash cannot be undone."
+    },
+    {
+      "id": "ios-backups",
+      "title": "iPhone and iPad backups",
+      "group": "system",
+      "tier": "caution",
+      "method": "trash",
+      "paths": [
+        "~/Library/Application Support/MobileSync/Backup/*"
+      ],
+      "needsFullDiskAccess": true,
+      "note": "A backup may be the only copy of a device's data."
+    },
+    {
+      "id": "system-caches",
+      "title": "System caches",
+      "group": "system",
+      "tier": "caution",
+      "method": "admin",
+      "paths": [
+        "/Library/Caches/*"
+      ],
+      "contentsOnly": true,
+      "ignore": [
+        "com.apple.*"
+      ],
+      "note": "Needs your administrator password."
+    },
+    {
+      "id": "system-logs",
+      "title": "System logs",
+      "group": "system",
+      "tier": "caution",
+      "method": "admin",
+      "paths": [
+        "/Library/Logs/*"
+      ],
+      "contentsOnly": true,
+      "note": "Needs your administrator password."
+    },
+    {
+      "id": "chrome-cache",
+      "title": "Google Chrome cache",
+      "group": "browser",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/Google/Chrome"
+      ],
+      "contentsOnly": true,
+      "skipWhileRunning": "com.google.Chrome"
+    },
+    {
+      "id": "brave-cache",
+      "title": "Brave cache",
+      "group": "browser",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/BraveSoftware/Brave-Browser"
+      ],
+      "contentsOnly": true,
+      "skipWhileRunning": "com.brave.Browser"
+    },
+    {
+      "id": "edge-cache",
+      "title": "Microsoft Edge cache",
+      "group": "browser",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/com.microsoft.edgemac"
+      ],
+      "contentsOnly": true,
+      "skipWhileRunning": "com.microsoft.edgemac"
+    },
+    {
+      "id": "opera-cache",
+      "title": "Opera cache",
+      "group": "browser",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/com.operasoftware.Opera"
+      ],
+      "contentsOnly": true,
+      "skipWhileRunning": "com.operasoftware.Opera"
+    },
+    {
+      "id": "arc-cache",
+      "title": "Arc cache",
+      "group": "browser",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/company.thebrowser.Browser"
+      ],
+      "contentsOnly": true,
+      "skipWhileRunning": "company.thebrowser.Browser"
+    },
+    {
+      "id": "firefox-cache",
+      "title": "Firefox cache",
+      "group": "browser",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/Firefox/Profiles/*/cache2"
+      ],
+      "contentsOnly": true,
+      "skipWhileRunning": "org.mozilla.firefox"
+    },
+    {
+      "id": "safari-cache",
+      "title": "Safari cache",
+      "group": "browser",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/com.apple.Safari",
+        "~/Library/Containers/com.apple.Safari/Data/Library/Caches"
+      ],
+      "contentsOnly": true,
+      "skipWhileRunning": "com.apple.Safari",
+      "needsFullDiskAccess": true
+    },
+    {
+      "id": "xcode-derived-data",
+      "title": "Xcode DerivedData",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Developer/Xcode/DerivedData/*"
+      ],
+      "skipWhileRunning": "com.apple.dt.Xcode",
+      "note": "Rebuilt on the next build."
+    },
+    {
+      "id": "xcode-device-support",
+      "title": "Xcode device support files",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Developer/Xcode/iOS DeviceSupport/*",
+        "~/Library/Developer/Xcode/watchOS DeviceSupport/*",
+        "~/Library/Developer/Xcode/tvOS DeviceSupport/*",
+        "~/Library/Developer/Xcode/macOS DeviceSupport/*"
+      ],
+      "note": "Rebuilt when the device is next connected."
+    },
+    {
+      "id": "xcode-archives",
+      "title": "Xcode archives",
+      "group": "developer",
+      "tier": "caution",
+      "method": "trash",
+      "paths": [
+        "~/Library/Developer/Xcode/Archives/*/*.xcarchive"
+      ],
+      "note": "Archives hold the dSYMs needed to symbolicate shipped builds."
+    },
+    {
+      "id": "simulator-caches",
+      "title": "Simulator caches",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Developer/CoreSimulator/Caches"
+      ],
+      "contentsOnly": true
+    },
+    {
+      "id": "unavailable-simulators",
+      "title": "Unavailable simulators",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Developer/CoreSimulator/Devices"
+      ],
+      "tool": {
+        "name": "xcrun",
+        "arguments": [
+          "simctl",
+          "delete",
+          "unavailable"
+        ],
+        "process": "Simulator"
+      },
+      "note": "Only simulators for runtimes that are no longer installed.",
+      "toolOnly": true
+    },
+    {
+      "id": "node-modules",
+      "title": "node_modules folders",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "walk": {
+        "roots": [
+          "~/repos",
+          "~/Projects",
+          "~/Developer",
+          "~/code",
+          "~/src",
+          "~/dev",
+          "~/work"
+        ],
+        "name": "node_modules",
+        "maxDepth": 5,
+        "requiresSibling": "package.json"
+      },
+      "note": "Restored by npm, pnpm or yarn install."
+    },
+    {
+      "id": "npm-cache",
+      "title": "npm cache",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/.npm/_cacache",
+        "~/.npm/_npx"
+      ],
+      "tool": {
+        "name": "npm",
+        "arguments": [
+          "cache",
+          "clean",
+          "--force"
+        ],
+        "process": "npm"
+      }
+    },
+    {
+      "id": "yarn-cache",
+      "title": "Yarn cache",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/Yarn"
+      ],
+      "tool": {
+        "name": "yarn",
+        "arguments": [
+          "cache",
+          "clean"
+        ],
+        "process": "yarn"
+      }
+    },
+    {
+      "id": "pnpm-store",
+      "title": "pnpm store (unused packages)",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/pnpm/store",
+        "~/Library/Caches/pnpm"
+      ],
+      "tool": {
+        "name": "pnpm",
+        "arguments": [
+          "store",
+          "prune"
+        ],
+        "process": "pnpm"
+      },
+      "toolOnly": true
+    },
+    {
+      "id": "bun-cache",
+      "title": "Bun cache",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/.bun/install/cache"
+      ],
+      "tool": {
+        "name": "bun",
+        "arguments": [
+          "pm",
+          "cache",
+          "rm"
+        ],
+        "process": "bun"
+      }
+    },
+    {
+      "id": "pip-cache",
+      "title": "pip cache",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/pip"
+      ],
+      "tool": {
+        "name": "pip3",
+        "arguments": [
+          "cache",
+          "purge"
+        ],
+        "process": "pip"
+      }
+    },
+    {
+      "id": "uv-cache",
+      "title": "uv cache",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/.cache/uv"
+      ],
+      "tool": {
+        "name": "uv",
+        "arguments": [
+          "cache",
+          "clean"
+        ],
+        "process": "uv"
+      },
+      "note": "Removed with uv's own command, never by deleting files.",
+      "toolOnly": true
+    },
+    {
+      "id": "homebrew-cache",
+      "title": "Homebrew downloads and old versions",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/Homebrew"
+      ],
+      "tool": {
+        "name": "brew",
+        "arguments": [
+          "cleanup",
+          "--prune=all"
+        ],
+        "process": "brew"
+      }
+    },
+    {
+      "id": "go-cache",
+      "title": "Go build and module cache",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/go-build",
+        "~/go/pkg/mod"
+      ],
+      "tool": {
+        "name": "go",
+        "arguments": [
+          "clean",
+          "-cache",
+          "-modcache"
+        ],
+        "process": "go"
+      },
+      "toolOnly": true
+    },
+    {
+      "id": "cargo-cache",
+      "title": "Cargo registry cache",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/.cargo/registry/cache",
+        "~/.cargo/registry/src"
+      ]
+    },
+    {
+      "id": "gradle-cache",
+      "title": "Gradle caches",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/.gradle/caches"
+      ],
+      "skipWhileRunning": "java"
+    },
+    {
+      "id": "cocoapods-cache",
+      "title": "CocoaPods cache",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/CocoaPods"
+      ],
+      "tool": {
+        "name": "pod",
+        "arguments": [
+          "cache",
+          "clean",
+          "--all"
+        ],
+        "process": "pod"
+      }
+    },
+    {
+      "id": "test-browsers",
+      "title": "Test browser downloads",
+      "group": "developer",
+      "tier": "safe",
+      "method": "delete",
+      "paths": [
+        "~/Library/Caches/ms-playwright",
+        "~/.cache/puppeteer",
+        "~/Library/Caches/Cypress"
+      ],
+      "note": "Downloaded again on the next test run."
+    },
+    {
+      "id": "docker",
+      "title": "Docker images and build cache",
+      "group": "developer",
+      "tier": "caution",
+      "method": "delete",
+      "paths": [
+        "~/Library/Containers/com.docker.docker/Data/vms"
+      ],
+      "tool": {
+        "name": "docker",
+        "arguments": [
+          "system",
+          "prune",
+          "--all",
+          "--force"
+        ],
+        "process": null
+      },
+      "note": "Removes unused images, stopped containers and build cache; volumes are kept. Docker must be running.",
+      "toolOnly": true
+    },
+    {
+      "id": "ml-models",
+      "title": "Downloaded AI models",
+      "group": "largeDownloads",
+      "tier": "caution",
+      "method": "trash",
+      "paths": [
+        "~/.cache/huggingface/hub/*",
+        "~/.ollama/models",
+        "~/.cache/whisper",
+        "~/.cache/lm-studio/models/*"
+      ],
+      "note": "Can be downloaded again, but they are large and slow to fetch."
+    }
+  ]
+}
