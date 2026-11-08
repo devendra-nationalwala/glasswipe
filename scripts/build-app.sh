@@ -69,6 +69,17 @@ codesign --force --deep --sign "$IDENTITY" --identifier "$BUNDLE_ID" "$APP"
 codesign --verify --strict "$APP" && echo "==> Built $APP ($VERSION)"
 
 if [ "${1:-}" = "--install" ]; then
+  cat <<'NOTICE'
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │ DISCLAIMER: Glasswipe deletes files, moves files to the Trash, quits apps │
+  │ and changes startup settings. It is provided "as is", without warranty.   │
+  │ The authors are NOT responsible for any data loss or deleted files.       │
+  │ Review every selection before cleaning up and keep a current backup.      │
+  │ Installing it means you accept this. See README.md#disclaimer.            │
+  └──────────────────────────────────────────────────────────────────────────┘
+
+NOTICE
   pkill -x Glasswipe 2>/dev/null || true
   rm -rf /Applications/Glasswipe.app
   cp -R "$APP" /Applications/

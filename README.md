@@ -4,7 +4,12 @@ A native macOS cleaner, in the spirit of CleanMyMac: clears Junk, frees memory, 
 
 > **Status: v1 complete.** Every feature below is implemented, tested and builds from the command line. Decisions are tracked on the [planning map](https://github.com/devendra-nationalwala/glasswipe/issues/1).
 
+> [!CAUTION]
+> **Use at your own risk.** Glasswipe deletes files, moves files to the Trash, quits apps and changes startup settings on your Mac. The authors and contributors are **not responsible for any data loss, deleted files, damage or other consequences** of using it. Always review what is selected before cleaning up, and keep a current backup (for example Time Machine). See the [full disclaimer](#disclaimer).
+
 ## Quick start
+
+By building, installing or running Glasswipe you accept the [disclaimer](#disclaimer): you use it at your own risk, and the authors are not responsible for anything it deletes.
 
 ```bash
 git clone https://github.com/devendra-nationalwala/glasswipe.git
@@ -134,6 +139,18 @@ Research findings are on the `research/*` branches.
 ## Forking
 
 Everything works the same in a fork. Replace `devendra-nationalwala/glasswipe` in `AGENTS.md`, `docs/agents/issue-tracker.md` and the links above with your own repo, and recreate the `wayfinder:*` labels if you want to use the planning workflow.
+
+## Disclaimer
+
+Glasswipe is free, open-source software provided **"as is", without warranty of any kind**, as stated in the [MIT License](LICENSE).
+
+- Glasswipe **permanently deletes** some files (recreatable Junk such as caches and logs, and anything removed by a tool's own clean command or with administrator rights) and **moves other files to the Trash**. Emptying the Trash makes those removals permanent.
+- The Safety Gate, default selections and review steps reduce risk but **cannot guarantee** that nothing you need will be removed. Apps sometimes keep important data in places meant for caches.
+- **You are responsible for reviewing every item before cleaning up, uninstalling or quitting apps, and for keeping backups.**
+- The authors and contributors **accept no liability** for lost or deleted data, corrupted apps or settings, lost work in apps that were quit, or any other direct or indirect damage arising from using, building or modifying Glasswipe.
+- Glasswipe is not affiliated with Apple or with the makers of any app it detects or removes.
+
+If you do not accept these terms, do not build, install or run Glasswipe.
 
 ## License
 
