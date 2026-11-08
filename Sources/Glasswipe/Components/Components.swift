@@ -55,12 +55,19 @@ struct ScanPrompt: View {
 struct ScanningView: View {
     let label: String
     let fraction: Double
+    /// Shown as a Stop button when the Scan can be stopped part-way.
+    var stop: (() -> Void)?
 
     var body: some View {
         VStack(spacing: 16) {
             Spacer()
             ProgressView(value: fraction).progressViewStyle(.circular).controlSize(.large)
             Text(label.isEmpty ? "Scanning…" : label).foregroundStyle(.secondary).lineLimit(1)
+            if let stop {
+                Button("Stop", systemImage: "stop.fill", action: stop)
+                    .buttonStyle(.glass)
+                    .help("Stop scanning")
+            }
             Spacer()
         }
         .frame(maxWidth: .infinity)

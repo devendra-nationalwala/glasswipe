@@ -75,16 +75,19 @@ public struct LargeFilesFinder: Sendable {
 
     public static let category = "Large & Old Files"
 
-    public func scan(now: Date = Date()) -> [ScanItem] {
+    /// `found` is called with each match as soon as it is found. If the calling task is cancelled,
+    /// it stops early and returns what it has found so far.
+    public func scan(now: Date = Date(), found: (@Sendable (ScanItem) -> Void)? = nil) -> [ScanItem] {
         let keys: [URLResourceKey] = [.isDirectoryKey, .isPackageKey, .isSymbolicLinkKey, .totalFileAllocatedSizeKey,
                                       .contentAccessDateKey, .contentModificationDateKey]
         let cutoff = now.addingTimeInterval(-Double(oldAfterDays) * 86_400)
         var items: [ScanItem] = []
-        for root in roots {
+        walk: for root in roots {
             guard let enumerator = FileManager.default.enumerator(at: root, includingPropertiesForKeys: keys,
                                                                    options: [.skipsPackageDescendants],
                                                                    errorHandler: { _, _ in true }) else { continue }
             for case let url as URL in enumerator {
+                if Task.isCancelled { break walk }
                 guard let v = try? url.resourceValues(forKeys: Set(keys)) else { continue }
                 if v.isSymbolicLink == true { continue }
                 if v.isDirectory == true && v.isPackage != true {
@@ -97,7 +100,7 @@ public struct LargeFilesFinder: Sendable {
                 let isLarge = size >= minimumSize
                 let isOld = size >= minimumOldSize && lastUse < cutoff
                 guard isLarge || isOld else { continue }
-                items.append(ScanItem(
+                let item = ScanItem(
                     url: url,
                     title: url.lastPathComponent,
                     category: isLarge ? "Large" : "Old",
@@ -106,7 +109,9 @@ public struct LargeFilesFinder: Sendable {
                     size: size,
                     note: url.deletingLastPathComponent().path.replacingOccurrences(of: NSHomeDirectory(), with: "~"),
                     modified: lastUse == .distantPast ? nil : lastUse
-                ))
+                )
+                items.append(item)
+                found?(item)
             }
         }
         return items.sorted { $0.size > $1.size }

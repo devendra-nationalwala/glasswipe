@@ -30,12 +30,33 @@ final class ScanSession {
     var scannedAt: Date?
     /// Rules still being measured while early results are already shown.
     var stillMeasuring: String?
+    /// True when the user stopped the last Scan before it finished.
+    var stoppedEarly = false
+    /// Bumped by every Scan and by `stopScan()`, so results from an abandoned Scan are ignored.
+    private var generation = 0
+    private var work: Task<[ScanItem], Never>?
 
     init(kind: Kind) { self.kind = kind }
 
     var selectedItems: [ScanItem] { items.filter { selection.contains($0.id) && $0.inUseBy == nil } }
     var selectedSize: Int64 { selectedItems.reduce(0) { $0 + $1.size } }
     var totalSize: Int64 { items.reduce(0) { $0 + $1.size } }
+
+    /// Whether this kind of Scan shows results while it runs, so it can be stopped part-way.
+    /// An app's footprint is never cut short: uninstalling half of it would leave files behind.
+    var canStopEarly: Bool {
+        switch kind {
+        case .junk, .largeFiles: true
+        case .leftovers, .footprint: false
+        }
+    }
+
+    /// True while a Scan is running and stopping it would keep useful results.
+    var isStoppable: Bool {
+        guard canStopEarly else { return false }
+        if case .scanning = phase { return true }
+        return stillMeasuring != nil
+    }
 
     /// Items grouped by category, largest group first.
     var groups: [(String, [ScanItem])] {
@@ -47,6 +68,9 @@ final class ScanSession {
     func scan() async {
         guard let model else { return }
         if Demo.isOn, case .junk = kind { return }
+        generation += 1
+        let current = generation
+        stoppedEarly = false
         phase = .scanning("Starting…", 0)
         model.refreshAccess()
         let found: [ScanItem]
@@ -60,8 +84,9 @@ final class ScanSession {
             )
             items = []
             selection = []
-            found = await scanner.scan(groups: groups, progress: { p in
+            let task = Task { await scanner.scan(groups: groups, progress: { p in
                 Task { @MainActor in
+                    guard current == self.generation else { return }
                     let remaining = p.total - p.completed
                     if case .scanning = self.phase {
                         self.phase = .scanning(p.current, p.total > 0 ? Double(p.completed) / Double(p.total) : 0)
@@ -69,13 +94,10 @@ final class ScanSession {
                     self.stillMeasuring = remaining > 0 ? "Still measuring \(remaining) more…" : nil
                 }
             }, found: { early in
-                Task { @MainActor in
-                    guard self.stillMeasuring != nil || self.phase != .results else { return }
-                    self.items = (self.items + early).sorted { $0.size > $1.size }
-                    self.selection.formUnion(early.filter(\.selectedByDefault).map(\.id))
-                    if case .scanning = self.phase { self.phase = .results }
-                }
-            })
+                Task { @MainActor in self.add(early, scan: current) }
+            }) }
+            work = task
+            found = await task.value
         case .leftovers:
             phase = .scanning("Listing installed apps…", 0.2)
             let apps = await AppInventory.scan(measure: false)
@@ -83,23 +105,60 @@ final class ScanSession {
             let finder = LeftoversFinder.live(installed: apps)
             found = await Task.detached { finder.scan() }.value
         case .largeFiles:
+            items = []
+            selection = []
             phase = .scanning("Looking through your folders…", 0.3)
             let exclusions = model.exclusions
-            found = await Task.detached {
-                LargeFilesFinder().scan().filter { item in
-                    !exclusions.contains { item.url?.path.hasPrefix(($0 as NSString).expandingTildeInPath) == true }
-                }
-            }.value
+            let isExcluded: @Sendable (ScanItem) -> Bool = { item in
+                exclusions.contains { item.url?.path.hasPrefix(($0 as NSString).expandingTildeInPath) == true }
+            }
+            let task = Task.detached {
+                LargeFilesFinder().scan(found: { item in
+                    guard !isExcluded(item) else { return }
+                    Task { @MainActor in
+                        self.add([item], scan: current)
+                        if current == self.generation { self.stillMeasuring = "Still looking through your folders…" }
+                    }
+                }).filter { !isExcluded($0) }
+            }
+            work = task
+            found = await task.value
         case .footprint(let app):
             phase = .scanning("Finding \(app.name)'s files…", 0.5)
             found = await Task.detached { FootprintFinder().footprint(of: app) }.value
         }
+        // Stopped early, or replaced by a newer Scan: keep what is on screen.
+        guard current == generation else { return }
+        work = nil
         // Keep choices the user made on early results.
         let earlier = Set(items.map(\.id))
         let userSelection = selection
         items = found
         selection = Set(found.filter { earlier.contains($0.id) ? userSelection.contains($0.id) : $0.selectedByDefault }.map(\.id))
         stillMeasuring = nil
+        scannedAt = Date()
+        phase = .results
+    }
+
+    /// Adds results that arrived while a Scan is still running, unless that Scan was stopped or replaced.
+    private func add(_ early: [ScanItem], scan: Int) {
+        guard scan == generation else { return }
+        let known = Set(items.map(\.id))
+        let fresh = early.filter { !known.contains($0.id) }
+        items = (items + fresh).sorted { $0.size > $1.size }
+        selection.formUnion(fresh.filter(\.selectedByDefault).map(\.id))
+        if case .scanning = phase { phase = .results }
+    }
+
+    /// Stops a running Scan and keeps what it has found so far, so the user can clean up without waiting.
+    /// Locations that hadn't finished measuring are left out; the next Scan checks them again.
+    func stopScan() {
+        guard isStoppable else { return }
+        generation += 1
+        work?.cancel()
+        work = nil
+        stillMeasuring = nil
+        stoppedEarly = true
         scannedAt = Date()
         phase = .results
     }
@@ -136,6 +195,11 @@ final class ScanSession {
     }
 
     func reset() {
+        generation += 1
+        work?.cancel()
+        work = nil
+        stillMeasuring = nil
+        stoppedEarly = false
         phase = .idle
         items = []
         selection = []

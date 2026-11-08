@@ -20,6 +20,7 @@ public enum FileSize {
             errorHandler: { _, _ in true }
         ) else { return 0 }
         for case let child as URL in enumerator {
+            if Task.isCancelled { break }
             guard let v = try? child.resourceValues(forKeys: keys), v.isSymbolicLink != true, v.isDirectory != true else { continue }
             total += Int64(v.totalFileAllocatedSize ?? v.fileAllocatedSize ?? 0)
         }

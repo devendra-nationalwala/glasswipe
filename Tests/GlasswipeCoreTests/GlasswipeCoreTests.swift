@@ -1,4 +1,5 @@
 import Foundation
+import Synchronization
 import Testing
 @testable import GlasswipeCore
 
@@ -169,6 +170,17 @@ struct JunkScannerTests {
         #expect(item.selectedByDefault)
         #expect(item.contentsOnly)
         #expect(item.size >= 100_000)
+    }
+
+    @Test func cancelledScanReportsNoPartlyMeasuredItems() async throws {
+        let home = try TempHome()
+        try home.file("Library/Caches/com.vendor.tool/blob", bytes: 100_000)
+        let rules = try rulesFromSource().rules.filter { $0.id == "user-caches" }
+        let s = scanner(home, rules: rules)
+        let task = Task { await s.scan() }
+        task.cancel()
+        let items = await task.value
+        #expect(items.allSatisfy { $0.size >= 100_000 }, "a stopped Scan keeps only fully measured items")
     }
 
     @Test func marksCachesOfRunningAppsAsInUse() async throws {
@@ -411,5 +423,16 @@ struct SystemTests {
         #expect(names.contains("big.iso"))
         #expect(!names.contains("small.txt"))
         #expect(!names.contains("huge.bin"), "Library is never scanned")
+    }
+
+    @Test func largeFilesFinderReportsEachMatchAsItIsFound() throws {
+        let home = try TempHome()
+        try home.file("Downloads/a.iso", bytes: 2_000_000)
+        try home.file("Downloads/b.iso", bytes: 2_000_000)
+        let streamed = Mutex<[String]>([])
+        let finder = LargeFilesFinder(roots: [home.url], minimumSize: 1_000_000)
+        let items = finder.scan(found: { item in streamed.withLock { $0.append(item.title) } })
+        #expect(Set(streamed.withLock { $0 }) == Set(items.map(\.title)))
+        #expect(items.count == 2)
     }
 }

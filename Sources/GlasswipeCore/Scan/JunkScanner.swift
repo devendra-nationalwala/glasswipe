@@ -22,6 +22,7 @@ public struct JunkScanner: Sendable {
 
     /// Scans every rule, reporting progress as each finishes.
     /// `found` is called with each rule's items as soon as that rule finishes, so results can appear progressively.
+    /// If the calling task is cancelled, it stops early and returns only the rules that finished measuring.
     public func scan(groups: Set<JunkRule.Group> = Set(JunkRule.Group.allCases),
                      progress: (@Sendable (Progress) -> Void)? = nil,
                      found: (@Sendable ([ScanItem]) -> Void)? = nil) async -> [ScanItem] {
@@ -32,6 +33,7 @@ public struct JunkScanner: Sendable {
             var items: [ScanItem] = []
             var completed = 0
             for await (title, ruleItems) in group {
+                if Task.isCancelled { group.cancelAll(); break }
                 completed += 1
                 items += ruleItems
                 if !ruleItems.isEmpty { found?(ruleItems) }
@@ -63,6 +65,8 @@ public struct JunkScanner: Sendable {
         }
 
         let sizes = await FileSize.allocatedSizes(of: matches)
+        // A rule interrupted part-way would report sizes that are too small.
+        if Task.isCancelled { return [] }
 
         var inUse: String?
         if let bundleID = rule.skipWhileRunning,
@@ -187,6 +191,7 @@ enum ProjectWalker {
                 at: dir, includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey], options: [])
         else { return }
         for child in children {
+            if Task.isCancelled { return }
             guard let v = try? child.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey]),
                   v.isDirectory == true, v.isSymbolicLink != true else { continue }
             let name = child.lastPathComponent

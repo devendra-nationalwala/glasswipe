@@ -86,7 +86,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 ## Using Glasswipe
 
 1. **Start with Overview → Smart Scan.** It scans System Junk and Developer Junk in one go and shows how much it found.
-2. **Review.** Each module lists what it found, grouped and sized. Untick anything you want to keep, or click 🔍 to see it in Finder.
+2. **Review.** Each module lists what it found, grouped and sized. Untick anything you want to keep, or click 🔍 to see it in Finder. Results appear while the Scan is still running. Don't want to wait? Click **Stop & Review** to clean up what has been found so far; the next Scan picks up the rest.
 3. **Clean Up.** A confirmation tells you exactly what will be deleted, what goes to the Trash, which tools will clean themselves, and whether your password is needed.
 4. **Changed your mind?** Anything moved to the Trash can be put back from the Trash. **History** lists everything that was removed.
 

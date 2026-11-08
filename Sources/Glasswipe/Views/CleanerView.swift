@@ -41,7 +41,7 @@ struct CleanerView: View {
         case .idle:
             ScanPrompt(module: module, explanation: explanation) { Task { await session.scan() } }
         case .scanning(let label, let fraction):
-            ScanningView(label: label, fraction: fraction)
+            ScanningView(label: label, fraction: fraction, stop: session.canStopEarly ? { session.stopScan() } : nil)
         case .cleaning(let fraction):
             ScanningView(label: "Cleaning up…", fraction: fraction)
         case .done(let freed, let failed):
@@ -49,22 +49,35 @@ struct CleanerView: View {
         case .results:
             if session.items.isEmpty {
                 ContentUnavailableView("Nothing to clean", systemImage: "checkmark.seal",
-                                       description: Text("Glasswipe found nothing here worth removing."))
+                                       description: Text(session.stoppedEarly
+                                           ? "The Scan was stopped before it found anything. Click Scan to start again."
+                                           : "Glasswipe found nothing here worth removing."))
             } else {
                 ResultsList(session: session)
                     .overlay(alignment: .bottom) {
                         ActionBar(
                             title: "\(session.selectedSize.formattedBytes) selected",
-                            detail: session.stillMeasuring
-                                ?? "\(session.selectedItems.count) of \(session.items.count) items · \(session.totalSize.formattedBytes) found",
+                            detail: session.stillMeasuring ?? summary,
                             actionTitle: "Clean Up",
                             actionSymbol: "sparkles",
                             enabled: !session.selectedItems.isEmpty && session.stillMeasuring == nil
                         ) { confirming = true } leading: {
-                            if session.stillMeasuring != nil { ProgressView().controlSize(.small).padding(.leading, 4) }
+                            if session.isStoppable {
+                                Button("Stop & Review", systemImage: "stop.fill") { session.stopScan() }
+                                    .buttonStyle(.glass)
+                                    .controlSize(.large)
+                                    .help("Stop scanning and clean up what has been found so far")
+                            } else if session.stillMeasuring != nil {
+                                ProgressView().controlSize(.small).padding(.leading, 4)
+                            }
                         }
                     }
             }
         }
+    }
+
+    private var summary: String {
+        let counts = "\(session.selectedItems.count) of \(session.items.count) items · \(session.totalSize.formattedBytes) found"
+        return session.stoppedEarly ? "Scan stopped early · \(counts)" : counts
     }
 }
