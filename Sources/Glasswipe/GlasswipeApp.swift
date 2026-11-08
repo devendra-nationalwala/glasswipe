@@ -88,12 +88,15 @@ struct ContentView: View {
             }
             .navigationSplitViewColumnWidth(min: 200, ideal: 220)
             .safeAreaInset(edge: .bottom) {
-                HStack(spacing: 8) {
-                    StarButton()
-                    CoffeeButton(compact: true)
+                VStack(spacing: 8) {
+                    HStack(spacing: 8) {
+                        StarButton()
+                        CoffeeButton(compact: true)
+                    }
+                    .buttonStyle(.glass)
+                    .controlSize(.small)
+                    AuthorCredit()
                 }
-                .buttonStyle(.glass)
-                .controlSize(.small)
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 12)
             }

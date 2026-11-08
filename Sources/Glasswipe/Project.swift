@@ -71,3 +71,20 @@ struct CoffeeButton: View {
         .help("Like Glasswipe? Buy the developer a coffee")
     }
 }
+
+/// Small "Built by" line in the sidebar footer; opens the author's GitHub profile.
+struct AuthorCredit: View {
+    @State private var hovering = false
+
+    var body: some View {
+        Link(destination: Project.authorProfile) {
+            Text("Built by \(Project.author)")
+                .font(.caption2)
+                .foregroundStyle(hovering ? .secondary : .tertiary)
+                .underline(hovering)
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .help("Open \(Project.author)'s GitHub profile")
+    }
+}
