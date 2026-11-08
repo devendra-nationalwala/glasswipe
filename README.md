@@ -39,6 +39,7 @@ Out of scope: Mac App Store distribution (its sandbox blocks the core features),
 - **Tools clean themselves.** Homebrew, npm, pip, uv, Docker and others are cleaned with their own commands, never by deleting their files.
 - **One Safety Gate** checks every path before removal and refuses system folders, your top-level folders, whole app containers and `Docker.raw`. If its rules fail to load, nothing can be removed.
 - **Caches of running apps are skipped.** Browser caches are offered only while the browser is closed.
+- **Leftovers are conservative.** Files count as Leftovers only when no installed app comes from the same vendor; launch agents only when the program they start is gone; Apple and system data never.
 - **Everything is logged** to `~/Library/Logs/Glasswipe/cleanup.jsonl` and shown in History.
 - **No fake RAM boosting.** The Memory Cleaner frees memory by quitting apps you choose, and shows the real before/after.
 
@@ -75,7 +76,8 @@ Only the macOS platform is needed; skip iOS and visionOS runtimes.
 | `scripts/build-app.sh` | Release build, assembled and signed as `build/Glasswipe.app` |
 | `scripts/build-app.sh --install` | Same, then copies it to `/Applications` |
 | `open Package.swift` | Opens the package in Xcode for previews and debugging |
-| `build/Glasswipe.app/Contents/MacOS/Glasswipe --snapshot <folder>` | Scans, saves a PNG of every screen into `<folder>`, then quits (for screenshots) |
+| `build/Glasswipe.app/Contents/MacOS/Glasswipe --report <kind>` | Read-only dry run: prints what a Scan finds and exits. Kinds: `junk`, `developer`, `leftovers`, `large`, `apps`, `startup`, `memory` |
+| `build/Glasswipe.app/Contents/MacOS/Glasswipe --snapshot <folder>` | Scans, saves a PNG of every screen into `<folder>`, then quits (for screenshots; glass effects are not captured) |
 
 The build script signs with, in order: `$GLASSWIPE_SIGN_IDENTITY`, your first Apple Development identity, "Glasswipe Local Signing", or ad hoc as a last resort.
 

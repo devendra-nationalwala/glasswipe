@@ -28,6 +28,8 @@ final class ScanSession {
     var selection: Set<String> = []
     var lastResults: [CleanupResult] = []
     var scannedAt: Date?
+    /// Rules still being measured while early results are already shown.
+    var stillMeasuring: String?
 
     init(kind: Kind) { self.kind = kind }
 
@@ -55,13 +57,24 @@ final class ScanSession {
                 gate: model.gate,
                 hasFullDiskAccess: model.hasFullDiskAccess
             )
-            found = await scanner.scan(groups: groups) { p in
+            items = []
+            selection = []
+            found = await scanner.scan(groups: groups, progress: { p in
                 Task { @MainActor in
+                    let remaining = p.total - p.completed
                     if case .scanning = self.phase {
                         self.phase = .scanning(p.current, p.total > 0 ? Double(p.completed) / Double(p.total) : 0)
                     }
+                    self.stillMeasuring = remaining > 0 ? "Still measuring \(remaining) more…" : nil
                 }
-            }
+            }, found: { early in
+                Task { @MainActor in
+                    guard self.stillMeasuring != nil || self.phase != .results else { return }
+                    self.items = (self.items + early).sorted { $0.size > $1.size }
+                    self.selection.formUnion(early.filter(\.selectedByDefault).map(\.id))
+                    if case .scanning = self.phase { self.phase = .results }
+                }
+            })
         case .leftovers:
             phase = .scanning("Listing installed apps…", 0.2)
             let apps = await AppInventory.scan(measure: false)
@@ -80,8 +93,12 @@ final class ScanSession {
             phase = .scanning("Finding \(app.name)'s files…", 0.5)
             found = await Task.detached { FootprintFinder().footprint(of: app) }.value
         }
+        // Keep choices the user made on early results.
+        let earlier = Set(items.map(\.id))
+        let userSelection = selection
         items = found
-        selection = Set(found.filter(\.selectedByDefault).map(\.id))
+        selection = Set(found.filter { earlier.contains($0.id) ? userSelection.contains($0.id) : $0.selectedByDefault }.map(\.id))
+        stillMeasuring = nil
         scannedAt = Date()
         phase = .results
     }

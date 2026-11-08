@@ -21,16 +21,24 @@ public struct JunkScanner: Sendable {
     }
 
     /// Scans every rule, reporting progress as each finishes.
+    /// `found` is called with each rule's items as soon as that rule finishes, so results can appear progressively.
     public func scan(groups: Set<JunkRule.Group> = Set(JunkRule.Group.allCases),
-                     progress: (@Sendable (Progress) -> Void)? = nil) async -> [ScanItem] {
+                     progress: (@Sendable (Progress) -> Void)? = nil,
+                     found: (@Sendable ([ScanItem]) -> Void)? = nil) async -> [ScanItem] {
         let selected = rules.filter { groups.contains($0.group) }
-        var items: [ScanItem] = []
-        for (index, rule) in selected.enumerated() {
-            progress?(Progress(completed: index, total: selected.count, current: rule.title))
-            items += await scan(rule: rule)
+        progress?(Progress(completed: 0, total: selected.count, current: selected.first?.title ?? ""))
+        return await withTaskGroup(of: (String, [ScanItem]).self) { group in
+            for rule in selected { group.addTask { (rule.title, await scan(rule: rule)) } }
+            var items: [ScanItem] = []
+            var completed = 0
+            for await (title, ruleItems) in group {
+                completed += 1
+                items += ruleItems
+                if !ruleItems.isEmpty { found?(ruleItems) }
+                progress?(Progress(completed: completed, total: selected.count, current: "Measured \(title)"))
+            }
+            return items.sorted { $0.size > $1.size }
         }
-        progress?(Progress(completed: selected.count, total: selected.count, current: ""))
-        return items.sorted { $0.size > $1.size }
     }
 
     public func scan(rule: JunkRule) async -> [ScanItem] {
@@ -91,8 +99,10 @@ public struct JunkScanner: Sendable {
             let size = sizes[url] ?? 0
             guard size > 0 else { return nil }
             var busy = inUse
-            if rule.skipRunningBundleIDs == true, environment.runningBundleIDs.contains(url.lastPathComponent) {
-                busy = url.lastPathComponent
+            let folder = url.lastPathComponent
+            if rule.skipRunningBundleIDs == true,
+               environment.runningBundleIDs.contains(folder) || environment.runningAppNames.contains(folder.lowercased()) {
+                busy = folder
             }
             return ScanItem(
                 url: url,
@@ -110,17 +120,23 @@ public struct JunkScanner: Sendable {
     }
 
     private func displayName(for url: URL, rule: JunkRule) -> String {
-        guard let paths = rule.paths, paths.contains(where: { $0.hasSuffix("*") || $0.contains("/*/") }) || rule.walk != nil else {
-            return rule.title
-        }
+        let short = url.path.replacingOccurrences(of: environment.home, with: "~")
         if rule.walk != nil {
             return url.deletingLastPathComponent().path.replacingOccurrences(of: environment.home, with: "~")
+        }
+        let paths = rule.paths ?? []
+        let globbed = paths.contains { $0.contains("*") }
+        if !globbed {
+            return paths.count > 1 ? "\(rule.title) · \(short)" : rule.title
         }
         if rule.id == "sandboxed-caches" {
             return AppNames.name(forBundleID: url.deletingLastPathComponent().deletingLastPathComponent()
                 .deletingLastPathComponent().lastPathComponent)
         }
-        return AppNames.name(forBundleID: url.lastPathComponent)
+        if rule.id.hasPrefix("user-") || rule.id.hasPrefix("system-") {
+            return AppNames.name(forBundleID: url.lastPathComponent)
+        }
+        return url.lastPathComponent
     }
 }
 

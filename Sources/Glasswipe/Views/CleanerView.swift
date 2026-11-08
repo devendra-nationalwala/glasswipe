@@ -55,11 +55,14 @@ struct CleanerView: View {
                     .overlay(alignment: .bottom) {
                         ActionBar(
                             title: "\(session.selectedSize.formattedBytes) selected",
-                            detail: "\(session.selectedItems.count) of \(session.items.count) items · \(session.totalSize.formattedBytes) found",
+                            detail: session.stillMeasuring
+                                ?? "\(session.selectedItems.count) of \(session.items.count) items · \(session.totalSize.formattedBytes) found",
                             actionTitle: "Clean Up",
                             actionSymbol: "sparkles",
-                            enabled: !session.selectedItems.isEmpty
-                        ) { confirming = true } leading: { EmptyView() }
+                            enabled: !session.selectedItems.isEmpty && session.stillMeasuring == nil
+                        ) { confirming = true } leading: {
+                            if session.stillMeasuring != nil { ProgressView().controlSize(.small).padding(.leading, 4) }
+                        }
                     }
             }
         }

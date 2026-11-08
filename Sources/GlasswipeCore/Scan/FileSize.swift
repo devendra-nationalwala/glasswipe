@@ -26,10 +26,23 @@ public enum FileSize {
         return total
     }
 
+    /// Like `allocatedSize(of:)`, but measures a folder's children in parallel. Much faster for huge caches.
+    public static func parallelAllocatedSize(of url: URL) async -> Int64 {
+        guard let values = try? url.resourceValues(forKeys: keys), values.isDirectory == true, values.isSymbolicLink != true,
+              let children = try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: Array(keys))
+        else { return allocatedSize(of: url) }
+        return await withTaskGroup(of: Int64.self) { group in
+            for child in children { group.addTask { allocatedSize(of: child) } }
+            var total: Int64 = 0
+            for await size in group { total += size }
+            return total
+        }
+    }
+
     /// Sizes many items concurrently.
     public static func allocatedSizes(of urls: [URL]) async -> [URL: Int64] {
         await withTaskGroup(of: (URL, Int64).self) { group in
-            for url in urls { group.addTask { (url, allocatedSize(of: url)) } }
+            for url in urls { group.addTask { (url, await parallelAllocatedSize(of: url)) } }
             var result: [URL: Int64] = [:]
             for await (url, size) in group { result[url] = size }
             return result

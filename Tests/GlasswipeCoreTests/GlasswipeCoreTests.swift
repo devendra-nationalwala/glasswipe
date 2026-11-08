@@ -180,6 +180,16 @@ struct JunkScannerTests {
         #expect(items.first?.selectedByDefault == false)
     }
 
+    @Test func marksCachesNamedAfterRunningAppsAsInUse() async throws {
+        let home = try TempHome()
+        try home.file("Library/Caches/Comet/blob")
+        let rules = try rulesFromSource().rules.filter { $0.id == "user-caches" }
+        var env = ScanEnvironment(home: home.path, tmpDir: home.path + "/tmp")
+        env.runningAppNames = ["comet"]
+        let items = await JunkScanner(rules: rules, environment: env, gate: SafetyGate(home: home.path), hasFullDiskAccess: false).scan()
+        #expect(items.first?.inUseBy == "Comet")
+    }
+
     @Test func skipsAppleCaches() async throws {
         let home = try TempHome()
         try home.file("Library/Caches/com.apple.Safari/blob")
@@ -328,6 +338,24 @@ struct AppFootprintTests {
         #expect(LeftoversFinder.isApple("com.apple.Safari"))
         #expect(LeftoversFinder.isApple("group.com.apple.notes"))
         #expect(!LeftoversFinder.isApple("com.vendor.App"))
+        #expect(LeftoversFinder.identifier(from: "warp.log.old.0") == nil)
+        #expect(LeftoversFinder.isApple("group.is.workflow.shortcuts"))
+        #expect(LeftoversFinder.isApple("243LU875E5.groups.com.apple.podcasts"))
+        #expect(LeftoversFinder.vendor(of: "group.com.vendor.app") == "com.vendor")
+        #expect(LeftoversFinder.identifier(from: "ABCDE12345.com.vendor.shared") == "ABCDE12345.com.vendor.shared")
+    }
+
+    @Test func workingLaunchAgentsAreNotLeftovers() throws {
+        let home = try TempHome()
+        let program = try home.file("bin/tool")
+        for (name, target) in [("com.tool.working", program.path), ("com.tool.broken", "/nonexistent/tool")] {
+            let plist = home.url.appendingPathComponent("Library/LaunchAgents/\(name).plist")
+            try FileManager.default.createDirectory(at: plist.deletingLastPathComponent(), withIntermediateDirectories: true)
+            let data = try PropertyListSerialization.data(fromPropertyList: ["Label": name, "Program": target], format: .xml, options: 0)
+            try data.write(to: plist)
+        }
+        let items = LeftoversFinder(home: home.path) { _ in false }.scan()
+        #expect(items.map(\.category) == ["com.tool.broken"])
     }
 
     @Test func leftoversAreUninstalledAppsOnly() throws {

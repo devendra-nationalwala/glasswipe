@@ -7,6 +7,10 @@ struct GlasswipeApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     @State private var model = AppModel()
 
+    init() {
+        if let kind = Report.requested { Report.run(kind) }
+    }
+
     var body: some Scene {
         Window("Glasswipe", id: "main") {
             ContentView()

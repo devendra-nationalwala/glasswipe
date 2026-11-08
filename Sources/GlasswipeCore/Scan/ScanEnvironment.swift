@@ -6,6 +6,8 @@ public struct ScanEnvironment: Sendable {
     public var home: String
     public var tmpDir: String
     public var runningBundleIDs: Set<String>
+    /// Lower-cased names of running apps, for caches named after the app rather than its bundle ID.
+    public var runningAppNames: Set<String> = []
     public var runningProcessNames: Set<String>
     public var toolSearchPaths: [String]
     public var now: Date
@@ -32,7 +34,8 @@ public struct ScanEnvironment: Sendable {
         let home = NSHomeDirectory()
         let bundleIDs = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
         let names = Set(ProcessList.all().map { $0.name.lowercased() })
-        return ScanEnvironment(
+        let appNames = Set(NSWorkspace.shared.runningApplications.compactMap { $0.localizedName?.lowercased() })
+        var environment = ScanEnvironment(
             home: home,
             tmpDir: (NSTemporaryDirectory() as NSString).standardizingPath,
             runningBundleIDs: bundleIDs,
@@ -44,6 +47,8 @@ public struct ScanEnvironment: Sendable {
             ],
             now: Date()
         )
+        environment.runningAppNames = appNames
+        return environment
     }
 
     public func expand(_ pattern: String) -> String {

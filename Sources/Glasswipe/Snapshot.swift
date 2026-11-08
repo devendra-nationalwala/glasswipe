@@ -13,6 +13,8 @@ enum Snapshot {
 
     static func run(_ model: AppModel, into folder: URL) async {
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        // Cached window drawings skip the window background, so dark-mode text would vanish on white.
+        NSApp.appearance = NSAppearance(named: .aqua)
         try? await Task.sleep(for: .seconds(1))
         async let a: Void = model.storage.scan()
         async let b: Void = model.developer.scan()
