@@ -2,9 +2,21 @@
 
 A native macOS cleaner, in the spirit of CleanMyMac: clears Junk, frees memory, and uninstalls apps along with everything they leave behind. Built with SwiftUI and Liquid Glass for macOS 26 and later.
 
-> **Status: planning.** There is no app to build yet. The v1 spec is being worked out in the open on the [planning map](https://github.com/devendra-nationalwala/glasswipe/issues/1). This README is updated as decisions land.
+> **Status: v1 in development.** Every v1 feature below is implemented and builds from the command line. Decisions are tracked on the [planning map](https://github.com/devendra-nationalwala/glasswipe/issues/1).
 
-## Planned v1 features
+## Quick start
+
+```bash
+git clone https://github.com/devendra-nationalwala/glasswipe.git
+cd glasswipe
+scripts/create-signing-identity.sh   # once: keeps Full Disk Access across rebuilds
+scripts/build-app.sh --install       # builds, signs and copies Glasswipe.app to /Applications
+open /Applications/Glasswipe.app
+```
+
+Then grant **Full Disk Access** (the app shows a banner with a button that opens the right Settings pane).
+
+## Features
 
 | Feature | What it does |
 |---|---|
@@ -14,10 +26,21 @@ A native macOS cleaner, in the spirit of CleanMyMac: clears Junk, frees memory, 
 | **Leftovers** | Finds files left behind by apps you already deleted |
 | **Space Lens** | Visual map of what is using your disk |
 | **Large & Old Files** | Finds big or long-untouched files |
-| **Startup Items** | Lists and toggles login items, launch agents and daemons |
+| **Startup Items** | Lists, enables/disables and removes launch agents and daemons; flags broken ones |
 | **Menu bar monitor** | Disk, memory, CPU and battery at a glance |
 
 Out of scope: Mac App Store distribution (its sandbox blocks the core features), malware scanning.
+
+### How Glasswipe keeps your files safe
+
+- **Nothing is removed without review.** Every module scans first, shows what it found, and asks before cleaning up.
+- **Safe items are pre-selected; anything that can't be recreated is unticked.** Name-only matches in the Uninstaller and every Leftover are opt-in.
+- **Recreatable Junk is deleted; everything else goes to the Trash**, so you can put it back.
+- **Tools clean themselves.** Homebrew, npm, pip, uv, Docker and others are cleaned with their own commands, never by deleting their files.
+- **One Safety Gate** checks every path before removal and refuses system folders, your top-level folders, whole app containers and `Docker.raw`. If its rules fail to load, nothing can be removed.
+- **Caches of running apps are skipped.** Browser caches are offered only while the browser is closed.
+- **Everything is logged** to `~/Library/Logs/Glasswipe/cleanup.jsonl` and shown in History.
+- **No fake RAM boosting.** The Memory Cleaner frees memory by quitting apps you choose, and shows the real before/after.
 
 Terms like Junk, Scan, Cleanup, App Footprint and Leftovers have precise meanings; see [`GLOSSARY.md`](GLOSSARY.md).
 
@@ -29,7 +52,7 @@ Terms like Junk, Scan, Cleanup, App Footprint and Leftovers have precise meaning
 
 - macOS 26 or later
 - Full **Xcode** (not just the Command Line Tools); developed with Xcode 27.2, macOS 27.2 SDK, Swift 6.4
-- An **Apple Development signing identity**; a free Apple account is enough
+- A **stable signing identity**: an Apple Development identity (free Apple account) or the self-signed one `scripts/create-signing-identity.sh` creates
 
 ### Installing Xcode from the command line
 
@@ -43,13 +66,27 @@ xcodebuild -version   # should print Xcode 27.x or later
 
 Only the macOS platform is needed; skip iOS and visionOS runtimes.
 
+## Building and testing
+
+| Command | What it does |
+|---|---|
+| `swift build` | Debug build of the core library and app |
+| `swift test` | Runs the test suite; every test works in a throwaway temp folder, never on your files |
+| `scripts/build-app.sh` | Release build, assembled and signed as `build/Glasswipe.app` |
+| `scripts/build-app.sh --install` | Same, then copies it to `/Applications` |
+| `open Package.swift` | Opens the package in Xcode for previews and debugging |
+| `build/Glasswipe.app/Contents/MacOS/Glasswipe --snapshot <folder>` | Scans, saves a PNG of every screen into `<folder>`, then quits (for screenshots) |
+
+The build script signs with, in order: `$GLASSWIPE_SIGN_IDENTITY`, your first Apple Development identity, "Glasswipe Local Signing", or ad hoc as a last resort.
+
 ## Permissions
 
 Glasswipe is a personal, non-notarized build, so macOS asks you to grant access yourself:
 
 - **Full Disk Access** (System Settings → Privacy & Security → Full Disk Access) is needed to scan protected locations such as Trash, Safari, Mail and other apps' containers. Most Junk in your home folder does not need it.
-- **Sign every build with the same identity.** macOS ties Full Disk Access to the app's code signature. Ad-hoc signed builds lose the grant on every rebuild; an Apple Development identity keeps it.
-- **Admin password** is asked only for the few system locations that need it (for example `/Library/Caches`).
+- **Sign every build with the same identity.** macOS ties Full Disk Access to the app's code signature. Ad-hoc signed builds lose the grant on every rebuild; an Apple Development identity or the "Glasswipe Local Signing" identity keeps it.
+- **Admin password** is asked once per Cleanup, only for the few system locations that need it (`/Library/Caches`, `/Library/Logs`, system launch daemons, apps owned by root).
+- **Notifications** (optional): the menu bar monitor can alert you when memory pressure is critical.
 
 ## How this project is planned
 
@@ -67,10 +104,19 @@ A ticket is ready when everything blocking it is closed. Decisions are summarise
 ## Repository layout
 
 ```
-AGENTS.md            instructions for coding agents working in this repo
-GLOSSARY.md          the project's domain language
-docs/agents/         how agents use the issue tracker and domain docs
-docs/adr/            architecture decision records (created as decisions land)
+Package.swift                         Swift package: GlasswipeCore library, Glasswipe app, tests
+Sources/GlasswipeCore/                all scanning, matching and removal logic (no UI)
+  Resources/junk-rules.json           where Junk lives and how to remove it — edit this to add rules
+  Safety/SafetyGate.swift             the single check every removal passes through
+  Cleanup/                            CleanupExecutor, removers, cleanup log
+  Scan/ Apps/ Memory/ Startup/ Disk/  one folder per module
+Sources/Glasswipe/                    SwiftUI app: window, menu bar, settings
+Tests/GlasswipeCoreTests/             test suite (temp folders only)
+scripts/                              build, signing identity and icon scripts
+AGENTS.md                             instructions for coding agents working in this repo
+GLOSSARY.md                           the project's domain language
+docs/agents/                          how agents use the issue tracker and domain docs
+docs/adr/                             architecture decision records
 ```
 
 Research findings are on the `research/*` branches.
@@ -79,6 +125,8 @@ Research findings are on the `research/*` branches.
 
 - Read [`GLOSSARY.md`](GLOSSARY.md) and use its terms in code, issues and commits.
 - Check the [planning map](https://github.com/devendra-nationalwala/glasswipe/issues/1) before proposing a feature; it may already be decided or ruled out of scope.
+- Run `swift test` before committing. New removal logic needs a test that proves it stays inside its temp folder.
+- To add a Junk location, add a rule to `junk-rules.json`; the `noRuleTargetsAProtectedLocation` test checks it against the Safety Gate.
 - Commits: plain, descriptive messages; no co-author trailers or tool attribution lines.
 
 ## Forking

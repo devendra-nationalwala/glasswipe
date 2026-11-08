@@ -28,6 +28,22 @@ A read-only pass that finds candidates for removal and measures them, without ch
 The act of removing the candidates the user approved after a Scan.
 _Avoid_: Purge (reserved for the macOS `purge` command)
 
+### Safety
+
+**Safety Gate**:
+The single check every path passes before any removal; it refuses Protected Locations and refuses everything if its rules are unavailable.
+
+**Protected Location**:
+A path Glasswipe never removes, whatever a rule or the user asks: system folders, the user's top-level folders, whole app containers, sealed data such as `Docker.raw`.
+_Avoid_: Blacklist
+
+**Safe item**:
+A Scan result its owner recreates on its own; it starts selected.
+
+**Review item**:
+A Scan result that cannot be recreated or is shared state; it is shown but starts unselected.
+_Avoid_: Risky item, unsafe item
+
 ### Apps
 
 **Uninstall**:
