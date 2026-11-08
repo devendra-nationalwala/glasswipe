@@ -57,7 +57,7 @@ final class AppModel {
     var hasFullDiskAccess = FullDiskAccess.isGranted()
     let rules: JunkRuleSet?
 
-    var memory = MemorySampler.sample()
+    var memory = Demo.isOn ? Demo.memory : MemorySampler.sample()
     var memoryHistory: [MemorySnapshot] = []
     var stats: SystemStats?
     private let statsSampler = SystemStatsSampler()
@@ -104,10 +104,10 @@ final class AppModel {
     }
 
     private func tick() {
-        memory = MemorySampler.sample()
+        memory = Demo.isOn ? Demo.memory : MemorySampler.sample()
         memoryHistory.append(memory)
         if memoryHistory.count > 90 { memoryHistory.removeFirst(memoryHistory.count - 90) }
-        stats = statsSampler.sample()
+        stats = Demo.isOn ? Demo.stats : statsSampler.sample()
         if memory.level == .critical, lastAlertLevel != .critical, alertOnCriticalPressure { notifyCriticalPressure() }
         lastAlertLevel = memory.level
     }

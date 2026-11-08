@@ -32,7 +32,7 @@ enum Snapshot {
         }
         for module in Module.allCases {
             model.selection = module
-            try? await Task.sleep(for: .seconds(module == .uninstaller ? 30 : module == .spaceLens ? 4 : 2))
+            try? await Task.sleep(for: .seconds(module == .spaceLens ? 4 : 2.5))
             let target = folder.appendingPathComponent("\(module.rawValue).png")
             // ScreenCaptureKit can stall (for example while the display sleeps); fall back after 5 s.
             let finished = await withTaskGroup(of: Bool.self) { group in

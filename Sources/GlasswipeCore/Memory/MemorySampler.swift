@@ -21,6 +21,20 @@ public struct MemorySnapshot: Sendable, Equatable {
     public let level: PressureLevel
     public let date: Date
 
+    public init(total: UInt64, app: UInt64, wired: UInt64, compressed: UInt64, cached: UInt64, free: UInt64,
+                swapUsed: UInt64, availablePercent: Int, level: PressureLevel, date: Date) {
+        self.total = total
+        self.app = app
+        self.wired = wired
+        self.compressed = compressed
+        self.cached = cached
+        self.free = free
+        self.swapUsed = swapUsed
+        self.availablePercent = availablePercent
+        self.level = level
+        self.date = date
+    }
+
     /// 0…100, how much pressure the system is under.
     public var pressurePercent: Int { max(0, min(100, 100 - availablePercent)) }
     public var used: UInt64 { app + wired + compressed }
@@ -92,6 +106,18 @@ public struct AppMemoryUsage: Identifiable, Sendable, Hashable {
     public let processCount: Int
     public let isActive: Bool
     public let isBackgroundCandidate: Bool
+
+    public init(pid: pid_t, name: String, bundleID: String?, bundleURL: URL?, footprint: UInt64, processCount: Int,
+                isActive: Bool, isBackgroundCandidate: Bool) {
+        self.pid = pid
+        self.name = name
+        self.bundleID = bundleID
+        self.bundleURL = bundleURL
+        self.footprint = footprint
+        self.processCount = processCount
+        self.isActive = isActive
+        self.isBackgroundCandidate = isBackgroundCandidate
+    }
 }
 
 public enum AppMemory {

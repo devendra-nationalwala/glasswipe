@@ -41,7 +41,7 @@ scripts/build-app.sh --install       # builds, signs and copies Glasswipe.app to
 | `scripts/release.sh <version>` | Tags, builds the DMG and publishes a GitHub Release (needs `gh` with push access) |
 | `open Package.swift` | Opens the package in Xcode for previews and debugging |
 | `Glasswipe --report <kind>` | Read-only dry run: prints what a Scan finds and exits. Kinds: `junk`, `developer`, `leftovers`, `large`, `apps`, `startup`, `memory`, `footprint <app name>` |
-| `open -n build/Glasswipe.app [--env GLASSWIPE_DEMO_HIDE=a,b] --args --demo --snapshot=<folder>` | Saves a PNG of every screen into `<folder>`, then quits. `--demo` fills the screens with sample data and never removes anything; `GLASSWIPE_DEMO_HIDE` hides real apps whose names contain any of the given words. Used for the README screenshots |
+| `open -n build/Glasswipe.app --args --demo --snapshot=<folder>` | Saves a PNG of every screen into `<folder>`, then quits. `--demo` shows only made-up apps, files, memory and disk figures, and never removes anything. Used for the README screenshots |
 
 The build script signs with, in order: `$GLASSWIPE_SIGN_IDENTITY`, your first Apple Development identity, "Glasswipe Local Signing", or ad hoc as a last resort.
 

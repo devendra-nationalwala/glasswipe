@@ -118,16 +118,20 @@ struct UninstallerView: View {
         let s = ScanSession(kind: .footprint(app))
         s.model = model
         session = s
-        Task { await s.scan() }
+        if Demo.isOn {
+            s.items = Demo.footprint(of: app)
+            s.selection = Set(s.items.filter(\.selectedByDefault).map(\.id))
+            s.phase = .results
+        } else {
+            Task { await s.scan() }
+        }
     }
 
     private func load() async {
         loading = true
-        apps = await AppInventory.scan().filter { !Demo.hides($0.name) && !Demo.hides($0.bundleID) }
+        apps = Demo.isOn ? Demo.apps : await AppInventory.scan()
         loading = false
-        if Demo.isOn, selected == nil, let sample = apps.first(where: { ["us.zoom.xos", "com.tinyspeck.slackmacgap", "com.spotify.client"].contains($0.bundleID) }) {
-            select(sample)
-        }
+        if Demo.isOn, selected == nil, let sample = apps.first { select(sample) }
     }
 
     private func uninstall(_ session: ScanSession) async {

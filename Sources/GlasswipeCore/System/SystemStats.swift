@@ -9,6 +9,14 @@ public struct SystemStats: Sendable {
     public let diskTotal: Int64
     public let batteryPercent: Int?
     public let isCharging: Bool
+
+    public init(cpuPercent: Double, diskFree: Int64, diskTotal: Int64, batteryPercent: Int?, isCharging: Bool) {
+        self.cpuPercent = cpuPercent
+        self.diskFree = diskFree
+        self.diskTotal = diskTotal
+        self.batteryPercent = batteryPercent
+        self.isCharging = isCharging
+    }
 }
 
 /// Keeps the previous CPU tick counts so usage can be computed as a delta.

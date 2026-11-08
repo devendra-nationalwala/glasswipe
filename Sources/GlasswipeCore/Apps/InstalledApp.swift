@@ -17,6 +17,19 @@ public struct InstalledApp: Identifiable, Hashable, Sendable {
     public let size: Int64
     public let lastUsed: Date?
 
+    public init(url: URL, name: String, bundleID: String, version: String?, nestedBundleIDs: [String], teamID: String?,
+                appGroups: [String], size: Int64, lastUsed: Date?) {
+        self.url = url
+        self.name = name
+        self.bundleID = bundleID
+        self.version = version
+        self.nestedBundleIDs = nestedBundleIDs
+        self.teamID = teamID
+        self.appGroups = appGroups
+        self.size = size
+        self.lastUsed = lastUsed
+    }
+
     public var allBundleIDs: [String] { [bundleID] + nestedBundleIDs }
     public var isApple: Bool { bundleID.hasPrefix("com.apple.") }
 }
