@@ -9,7 +9,11 @@ VERSION="${1:?usage: scripts/release.sh <version, e.g. 1.0.0>}"
 TAG="v$VERSION"
 
 if [ -n "$(git status --porcelain)" ]; then echo "error: commit your changes first"; exit 1; fi
-git tag -a "$TAG" -m "Glasswipe $VERSION" 2>/dev/null || echo "Tag $TAG already exists; reusing it"
+git fetch -q --tags origin
+if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+  echo "error: $TAG already exists (latest: $(git describe --tags --abbrev=0)). Pick a newer version."; exit 1
+fi
+git tag -a "$TAG" -m "Glasswipe $VERSION"
 git push origin "$TAG"
 
 scripts/make-dmg.sh

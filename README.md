@@ -182,6 +182,6 @@ If you do not accept these terms, do not build, install or run Glasswipe.
 
 <div align="center">
 
-Built by **[Devendra Nationalwala](https://github.com/devendra-nationalwala)** · If Glasswipe helped, please ⭐ the repo
+Built by **[Devendra Nationalwala](https://github.com/devendra-nationalwala)** · If Glasswipe helped, please ⭐ the repo or [☕ buy me a coffee](https://donate.stripe.com/4gMdRa8GPapX8oSgoO8og01)
 
 </div>
