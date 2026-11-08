@@ -17,9 +17,10 @@ enum Snapshot {
         NSApp.appearance = NSAppearance(named: .aqua)
         try? await Task.sleep(for: .seconds(1))
         async let a: Void = model.storage.scan()
-        async let b: Void = model.developer.scan()
         async let c: Void = model.leftovers.scan()
-        _ = await (a, b, c)
+        _ = await (a, c)
+        // Developer Junk can take minutes on machines with huge tool caches; only include it when asked.
+        if CommandLine.arguments.contains("--with-developer") { await model.developer.scan() }
         for module in Module.allCases {
             model.selection = module
             try? await Task.sleep(for: .seconds(module == .uninstaller || module == .spaceLens ? 6 : 2.5))

@@ -33,6 +33,16 @@ enum Report {
                 items = await MainActor.run { LeftoversFinder.live(installed: apps) }.scan()
             case "large":
                 items = LargeFilesFinder().scan()
+            case "footprint":
+                let args = CommandLine.arguments
+                let query = args.count > args.firstIndex(of: "--report")! + 2 ? args[args.firstIndex(of: "--report")! + 2] : ""
+                let apps = await AppInventory.scan(measure: false)
+                if let app = apps.first(where: { $0.name.localizedCaseInsensitiveCompare(query) == .orderedSame || $0.bundleID == query }),
+                   let measured = AppInventory.describe(app.url) {
+                    items = FootprintFinder().footprint(of: measured)
+                } else {
+                    lines.append("No installed app named \(query)")
+                }
             case "apps":
                 for app in await AppInventory.scan() {
                     lines.append("\(app.size.formattedBytes)\t\(app.name)\t\(app.bundleID)\tteam=\(app.teamID ?? "-")\tgroups=\(app.appGroups.joined(separator: ","))")
@@ -48,7 +58,7 @@ enum Report {
                     lines.append("\(app.footprint.formattedBytes)\t\(app.name)\t\(app.processCount) processes")
                 }
             default:
-                lines.append("Unknown report \(kind). Use junk, developer, leftovers, apps, large, startup or memory.")
+                lines.append("Unknown report \(kind). Use junk, developer, leftovers, apps, large, startup, memory or footprint <app>.")
             }
             for item in items {
                 let flags = [item.selectedByDefault ? "selected" : "unticked", item.inUseBy.map { "in use: \($0)" }]

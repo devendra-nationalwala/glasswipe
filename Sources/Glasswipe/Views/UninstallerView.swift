@@ -25,7 +25,7 @@ struct UninstallerView: View {
     }
 
     var body: some View {
-        HSplitView {
+        HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 12) {
                 ModuleHeader(module: .uninstaller, subtitle: "\(apps.count) apps · \(apps.reduce(0) { $0 + $1.size }.formattedBytes)")
                 HStack {
@@ -45,9 +45,12 @@ struct UninstallerView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
-            .frame(minWidth: 340, idealWidth: 380)
+            .frame(width: 380)
+            .frame(maxHeight: .infinity, alignment: .top)
 
-            detail.frame(minWidth: 380, maxWidth: .infinity)
+            Divider()
+
+            detail.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
         .task { if apps.isEmpty { await load() } }
         .toolbar {

@@ -9,6 +9,7 @@ struct SpaceLensView: View {
     @State private var loading = false
     @State private var hovered: SpaceNode?
     @State private var trashTarget: SpaceNode?
+    @State private var cache: [URL: [SpaceNode]] = [:]
     @Environment(AppModel.self) private var model
 
     var current: URL { path.last! }
@@ -35,7 +36,7 @@ struct SpaceLensView: View {
                 .fixedSize()
             }
             ZStack {
-                if loading {
+                if loading && nodes.isEmpty {
                     ScanningView(label: "Measuring \(current.lastPathComponent)…", fraction: 0.5)
                 } else if nodes.isEmpty {
                     ContentUnavailableView("Empty or not readable", systemImage: "folder",
@@ -54,6 +55,7 @@ struct SpaceLensView: View {
                     Text(hovered.isDirectory ? "Click to open" : "Click to show in Finder").foregroundStyle(.tertiary)
                 } else {
                     Text("\(nodes.reduce(0) { $0 + $1.size }.formattedBytes) in \(current.path)").foregroundStyle(.secondary)
+                    if loading { ProgressView().controlSize(.small); Text("still measuring…").foregroundStyle(.tertiary) }
                 }
                 Spacer()
                 Text("Right-click an item to move it to the Trash.").font(.caption).foregroundStyle(.tertiary)
@@ -71,8 +73,20 @@ struct SpaceLensView: View {
     }
 
     private func load() async {
+        let target = current
+        if let cached = cache[target] { nodes = cached; return }
         loading = true
-        nodes = await SpaceLens.children(of: current)
+        nodes = []
+        let final = await SpaceLens.children(of: target) { node in
+            Task { @MainActor in
+                guard current == target, loading else { return }
+                nodes.append(node)
+                nodes.sort { $0.size > $1.size }
+            }
+        }
+        guard current == target else { return }
+        cache[target] = final
+        nodes = final
         loading = false
     }
 
@@ -80,6 +94,7 @@ struct SpaceLensView: View {
         guard model.gate.forUninstall.allows(node.url) else { return }
         try? FileManager.default.trashItem(at: node.url, resultingItemURL: nil)
         nodes.removeAll { $0.id == node.id }
+        cache = [:]
     }
 
     private func chooseFolder() {

@@ -11,22 +11,29 @@ public struct SpaceNode: Identifiable, Sendable, Hashable {
 
 public enum SpaceLens {
     /// Immediate children of a folder with their allocated sizes, largest first.
-    /// Packages (.app, .photoslibrary…) count as single items.
-    public static func children(of url: URL) async -> [SpaceNode] {
+    /// Packages (.app, .photoslibrary…) count as single items. `partial` receives each child as soon as it is measured.
+    public static func children(of url: URL, partial: (@Sendable (SpaceNode) -> Void)? = nil) async -> [SpaceNode] {
         let keys: [URLResourceKey] = [.isDirectoryKey, .isPackageKey, .isSymbolicLinkKey]
         guard let entries = try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: keys, options: []) else {
             return []
         }
         let candidates = entries.filter { (try? $0.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) != true }
-        let sizes = await FileSize.allocatedSizes(of: candidates)
-        return candidates.compactMap { child in
-            let values = try? child.resourceValues(forKeys: Set(keys))
-            let size = sizes[child] ?? 0
-            guard size > 0 else { return nil }
-            let isDir = values?.isDirectory == true && values?.isPackage != true
-            return SpaceNode(url: child, name: FileManager.default.displayName(atPath: child.path), size: size, isDirectory: isDir)
+        return await withTaskGroup(of: SpaceNode?.self) { group in
+            for child in candidates {
+                group.addTask {
+                    let size = await FileSize.parallelAllocatedSize(of: child)
+                    guard size > 0 else { return nil }
+                    let values = try? child.resourceValues(forKeys: Set(keys))
+                    let isDir = values?.isDirectory == true && values?.isPackage != true
+                    let node = SpaceNode(url: child, name: FileManager.default.displayName(atPath: child.path), size: size, isDirectory: isDir)
+                    partial?(node)
+                    return node
+                }
+            }
+            var nodes: [SpaceNode] = []
+            for await node in group { if let node { nodes.append(node) } }
+            return nodes.sorted { $0.size > $1.size }
         }
-        .sorted { $0.size > $1.size }
     }
 
     public struct Volume: Sendable {
