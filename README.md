@@ -2,7 +2,7 @@
 
 A native macOS cleaner, in the spirit of CleanMyMac: clears Junk, frees memory, and uninstalls apps along with everything they leave behind. Built with SwiftUI and Liquid Glass for macOS 26 and later.
 
-> **Status: v1 in development.** Every v1 feature below is implemented and builds from the command line. Decisions are tracked on the [planning map](https://github.com/devendra-nationalwala/glasswipe/issues/1).
+> **Status: v1 complete.** Every feature below is implemented, tested and builds from the command line. Decisions are tracked on the [planning map](https://github.com/devendra-nationalwala/glasswipe/issues/1).
 
 ## Quick start
 
