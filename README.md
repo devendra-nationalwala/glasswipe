@@ -1,144 +1,162 @@
+<div align="center">
+
 # Glasswipe
 
-A native macOS cleaner, in the spirit of CleanMyMac: clears Junk, frees memory, and uninstalls apps along with everything they leave behind. Built with SwiftUI and Liquid Glass for macOS 26 and later.
+**A free, open-source Mac cleaner with a native Liquid Glass design.**
+Clear out Junk, free up memory, and uninstall apps along with everything they leave behind.
 
-> **Status: v1 complete.** Every feature below is implemented, tested and builds from the command line. Decisions are tracked on the [planning map](https://github.com/devendra-nationalwala/glasswipe/issues/1).
+[**⬇ Download Glasswipe for macOS**](https://github.com/devendra-nationalwala/glasswipe/releases/latest/download/Glasswipe.dmg)
+
+macOS 26 (Tahoe) or later · Apple Silicon · [All releases](https://github.com/devendra-nationalwala/glasswipe/releases) · [MIT License](LICENSE)
+
+![Glasswipe overview](docs/screenshots/overview.png)
+
+</div>
 
 > [!CAUTION]
 > **Use at your own risk.** Glasswipe deletes files, moves files to the Trash, quits apps and changes startup settings on your Mac. The authors and contributors are **not responsible for any data loss, deleted files, damage or other consequences** of using it. Always review what is selected before cleaning up, and keep a current backup (for example Time Machine). See the [full disclaimer](#disclaimer).
 
-## Quick start
+## What it does
 
-By building, installing or running Glasswipe you accept the [disclaimer](#disclaimer): you use it at your own risk, and the authors are not responsible for anything it deletes.
+| | |
+|---|---|
+| **Storage Cleaner** | Finds caches, logs, temporary files, browser caches and the Trash that are safe to remove. |
+| **Developer Junk** | Clears Xcode build data, `node_modules`, and caches from npm, pip, uv, Homebrew, Docker and more, using each tool's own clean command. |
+| **Memory Cleaner** | Shows real memory pressure and frees memory by quitting the apps you choose. No fake "RAM boost". |
+| **Uninstaller** | Removes an app together with its preferences, caches, containers and startup items. |
+| **Leftovers** | Finds files left behind by apps you already deleted. |
+| **Space Lens** | A map of what is taking up your disk. Click to dig into any folder. |
+| **Large & Old Files** | Finds big or long-forgotten files in your folders. |
+| **Startup Items** | Turn background agents on or off, and remove broken ones. |
+| **Menu bar monitor** | Memory, CPU, disk and battery at a glance, with quick actions. |
+| **History** | Everything Glasswipe has removed, and how much space it freed. |
+
+## Screenshots
+
+**Storage Cleaner:** every item is reviewed before anything is removed. Safe items start ticked; anything that can't be recreated is marked *Review* and starts unticked.
+![Storage Cleaner](docs/screenshots/storage.png)
+
+**Developer Junk:** build products and package caches, cleaned with each tool's own command.
+![Developer Junk](docs/screenshots/developer.png)
+
+**Memory Cleaner:** apps grouped with their helper processes, sorted by how much memory they really use.
+![Memory Cleaner](docs/screenshots/memory.png)
+
+**Uninstaller:** the app and every file it created, matched by its exact identifiers.
+![Uninstaller](docs/screenshots/uninstaller.png)
+
+**Space Lens:** see at a glance where your space went.
+![Space Lens](docs/screenshots/spaceLens.png)
+
+## Install
+
+1. **[Download Glasswipe.dmg](https://github.com/devendra-nationalwala/glasswipe/releases/latest/download/Glasswipe.dmg)** and open it.
+2. Drag **Glasswipe** onto the **Applications** folder.
+3. Open Glasswipe from Applications. macOS will say it **can't verify the developer**. This is expected: Glasswipe is free open-source software and is not notarized by Apple.
+4. Open **System Settings → Privacy & Security**, scroll down, click **Open Anyway** next to Glasswipe, and confirm. You only need to do this once.
+5. In Glasswipe, click **Open Settings** on the orange banner and switch on **Glasswipe** under **Full Disk Access**. Then click **Check Again**.
+
+By installing or running Glasswipe you accept the [disclaimer](#disclaimer).
+
+<details>
+<summary>Prefer the Terminal for step 4?</summary>
+
+```bash
+xattr -dr com.apple.quarantine /Applications/Glasswipe.app
+```
+
+This removes the "downloaded from the internet" flag so macOS opens the app without asking.
+</details>
+
+<details>
+<summary>Build it yourself instead</summary>
+
+You need full Xcode. Then:
 
 ```bash
 git clone https://github.com/devendra-nationalwala/glasswipe.git
 cd glasswipe
-scripts/create-signing-identity.sh   # once: keeps Full Disk Access across rebuilds
-scripts/build-app.sh --install       # builds, signs and copies Glasswipe.app to /Applications
-open /Applications/Glasswipe.app
+scripts/create-signing-identity.sh
+scripts/build-app.sh --install
 ```
 
-Then grant **Full Disk Access** (the app shows a banner with a button that opens the right Settings pane).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+</details>
 
-## Features
+## Using Glasswipe
 
-| Feature | What it does |
-|---|---|
-| **Storage Cleaner** | Finds and removes Junk: caches, logs, temp files, Trash, and Developer Junk (Xcode, `node_modules`, Homebrew/npm/pip/uv/Docker caches) |
-| **Memory Cleaner** | Shows real memory pressure and frees RAM by quitting or relaunching the processes that hold it, with your approval |
-| **Uninstaller** | Removes an app together with its App Footprint: preferences, support files, containers, launch agents, receipts |
-| **Leftovers** | Finds files left behind by apps you already deleted |
-| **Space Lens** | Visual map of what is using your disk |
-| **Large & Old Files** | Finds big or long-untouched files |
-| **Startup Items** | Lists, enables/disables and removes launch agents and daemons; flags broken ones |
-| **Menu bar monitor** | Disk, memory, CPU and battery at a glance |
+1. **Start with Overview → Smart Scan.** It scans System Junk and Developer Junk in one go and shows how much it found.
+2. **Review.** Each module lists what it found, grouped and sized. Untick anything you want to keep, or click 🔍 to see it in Finder.
+3. **Clean Up.** A confirmation tells you exactly what will be deleted, what goes to the Trash, which tools will clean themselves, and whether your password is needed.
+4. **Changed your mind?** Anything moved to the Trash can be put back from the Trash. **History** lists everything that was removed.
 
-Out of scope: Mac App Store distribution (its sandbox blocks the core features), malware scanning.
+**To uninstall an app:** open **Uninstaller**, pick the app, check the list of files, and click **Uninstall**. The app is quit first if it's running.
 
-### How Glasswipe keeps your files safe
+**To free memory:** open **Memory Cleaner**, tick the apps you can close (or click *Select background apps over 500 MB*), and click **Free Up Memory**. Apps are asked to quit normally, so they can save your work.
 
-- **Nothing is removed without review.** Every module scans first, shows what it found, and asks before cleaning up.
-- **Safe items are pre-selected; anything that can't be recreated is unticked.** Name-only matches in the Uninstaller and every Leftover are opt-in.
+**Menu bar:** Glasswipe keeps running in the menu bar after you close its window. Click the ✨ icon for live stats and quick actions; choose **Quit** there to exit completely.
+
+**Settings** (⌘,): check Full Disk Access, turn the critical-memory notification on or off, and add **Exclusions**: folders Glasswipe will never scan or touch.
+
+## How Glasswipe keeps your files safe
+
+- **Nothing is removed without your review.** Every module scans first, shows what it found, and asks before cleaning up.
+- **Safe items are pre-selected; anything that can't be recreated is unticked.** In the Uninstaller, files matched only by name are opt-in. Every Leftover is opt-in.
 - **Recreatable Junk is deleted; everything else goes to the Trash**, so you can put it back.
 - **Tools clean themselves.** Homebrew, npm, pip, uv, Docker and others are cleaned with their own commands, never by deleting their files.
-- **One Safety Gate** checks every path before removal and refuses system folders, your top-level folders, whole app containers and `Docker.raw`. If its rules fail to load, nothing can be removed.
+- **A Safety Gate checks every path** and refuses system folders, your top-level folders (Documents, Desktop, …), whole app containers and Docker's disk image. If its rules fail to load, nothing can be removed.
 - **Caches of running apps are skipped.** Browser caches are offered only while the browser is closed.
-- **Leftovers are conservative.** Files count as Leftovers only when no installed app comes from the same vendor; launch agents only when the program they start is gone; Apple and system data never.
+- **Leftovers are conservative.** Files count as Leftovers only when no installed app comes from the same developer. Apple and system files never do.
 - **Everything is logged** to `~/Library/Logs/Glasswipe/cleanup.jsonl` and shown in History.
-- **No fake RAM boosting.** The Memory Cleaner frees memory by quitting apps you choose, and shows the real before/after.
+- **No internet connection.** Glasswipe works entirely on your Mac; it sends nothing anywhere.
 
-Terms like Junk, Scan, Cleanup, App Footprint and Leftovers have precise meanings; see [`GLOSSARY.md`](GLOSSARY.md).
+## FAQ
 
-## Requirements
+<details>
+<summary><b>macOS says Glasswipe "can't be opened" or "is damaged".</b></summary>
 
-**To run:** macOS 26 (Tahoe) or later, Apple Silicon.
+That is Gatekeeper blocking an app that isn't notarized by Apple. Use **System Settings → Privacy & Security → Open Anyway**, or run `xattr -dr com.apple.quarantine /Applications/Glasswipe.app` in Terminal.
+</details>
 
-**To build:**
+<details>
+<summary><b>Why does it need Full Disk Access?</b></summary>
 
-- macOS 26 or later
-- Full **Xcode** (not just the Command Line Tools); developed with Xcode 27.2, macOS 27.2 SDK, Swift 6.4
-- A **stable signing identity**: an Apple Development identity (free Apple account) or the self-signed one `scripts/create-signing-identity.sh` creates
+macOS hides the Trash, Safari, Mail, iOS backups and other apps' data from every app unless you allow it. Without Full Disk Access, Glasswipe still works but skips those locations.
+</details>
 
-### Installing Xcode from the command line
+<details>
+<summary><b>Why does it sometimes ask for my password?</b></summary>
 
-You must already be signed in to the App Store app.
+Only when you clean system-wide folders (like `/Library/Caches`), change system-wide startup items, or uninstall an app owned by the system. macOS asks once per Cleanup. Glasswipe never stores your password.
+</details>
 
-```bash
-brew install mas
-sudo sh -c 'mas get 497799835 && xcode-select -s /Applications/Xcode.app/Contents/Developer && xcodebuild -license accept && xcodebuild -runFirstLaunch'
-xcodebuild -version   # should print Xcode 27.x or later
-```
+<details>
+<summary><b>Full Disk Access stopped working after an update.</b></summary>
 
-Only the macOS platform is needed; skip iOS and visionOS runtimes.
+macOS ties the permission to the app's signature. If an update was signed differently, switch Glasswipe off and on again under Full Disk Access.
+</details>
 
-## Building and testing
+<details>
+<summary><b>Why is the Developer Junk scan slow?</b></summary>
 
-| Command | What it does |
-|---|---|
-| `swift build` | Debug build of the core library and app |
-| `swift test` | Runs the test suite; every test works in a throwaway temp folder, never on your files |
-| `scripts/build-app.sh` | Release build, assembled and signed as `build/Glasswipe.app` |
-| `scripts/build-app.sh --install` | Same, then copies it to `/Applications` |
-| `open Package.swift` | Opens the package in Xcode for previews and debugging |
-| `build/Glasswipe.app/Contents/MacOS/Glasswipe --report <kind>` | Read-only dry run: prints what a Scan finds and exits. Kinds: `junk`, `developer`, `leftovers`, `large`, `apps`, `startup`, `memory`, `footprint <app name>` |
-| `build/Glasswipe.app/Contents/MacOS/Glasswipe --snapshot <folder>` | Scans, saves a PNG of every screen into `<folder>`, then quits (for screenshots; glass effects are not captured) |
+Package caches such as uv or npm can hold millions of tiny files, and measuring them takes time. Results appear while the rest is still being measured.
+</details>
 
-The build script signs with, in order: `$GLASSWIPE_SIGN_IDENTITY`, your first Apple Development identity, "Glasswipe Local Signing", or ad hoc as a last resort.
+<details>
+<summary><b>Why doesn't Startup Items list the apps that open at login?</b></summary>
 
-## Permissions
+macOS only lets administrators read that list. Glasswipe shows background agents and daemons, and the **Open Login Items Settings** button takes you to the system list.
+</details>
 
-Glasswipe is a personal, non-notarized build, so macOS asks you to grant access yourself:
+<details>
+<summary><b>How do I remove Glasswipe?</b></summary>
 
-- **Full Disk Access** (System Settings → Privacy & Security → Full Disk Access) is needed to scan protected locations such as Trash, Safari, Mail and other apps' containers. Most Junk in your home folder does not need it.
-- **Sign every build with the same identity.** macOS ties Full Disk Access to the app's code signature. Ad-hoc signed builds lose the grant on every rebuild; an Apple Development identity or the "Glasswipe Local Signing" identity keeps it.
-- **Admin password** is asked once per Cleanup, only for the few system locations that need it (`/Library/Caches`, `/Library/Logs`, system launch daemons, apps owned by root).
-- **Notifications** (optional): the menu bar monitor can alert you when memory pressure is critical.
-
-## How this project is planned
-
-Planning uses a **wayfinder map**: one GitHub issue labelled `wayfinder:map` that indexes every decision, with each open question as a child issue.
-
-| Label | Meaning |
-|---|---|
-| `wayfinder:research` | A fact to look up; findings live on a `research/<topic>` branch that is never merged |
-| `wayfinder:grilling` | A decision made through discussion |
-| `wayfinder:prototype` | A rough artifact (UI or logic) built to react to |
-| `wayfinder:task` | Setup work that unblocks a decision |
-
-A ticket is ready when everything blocking it is closed. Decisions are summarised on the map and recorded in full on their ticket.
-
-## Repository layout
-
-```
-Package.swift                         Swift package: GlasswipeCore library, Glasswipe app, tests
-Sources/GlasswipeCore/                all scanning, matching and removal logic (no UI)
-  Resources/junk-rules.json           where Junk lives and how to remove it — edit this to add rules
-  Safety/SafetyGate.swift             the single check every removal passes through
-  Cleanup/                            CleanupExecutor, removers, cleanup log
-  Scan/ Apps/ Memory/ Startup/ Disk/  one folder per module
-Sources/Glasswipe/                    SwiftUI app: window, menu bar, settings
-Tests/GlasswipeCoreTests/             test suite (temp folders only)
-scripts/                              build, signing identity and icon scripts
-AGENTS.md                             instructions for coding agents working in this repo
-GLOSSARY.md                           the project's domain language
-docs/agents/                          how agents use the issue tracker and domain docs
-docs/adr/                             architecture decision records
-```
-
-Research findings are on the `research/*` branches.
+Quit it from the menu bar, then drag `/Applications/Glasswipe.app` to the Trash. Optionally delete `~/Library/Logs/Glasswipe` and run `defaults delete io.github.devendra-nationalwala.glasswipe` to remove its settings. If you created the signing identity, delete "Glasswipe Local Signing" in Keychain Access.
+</details>
 
 ## Contributing
 
-- Read [`GLOSSARY.md`](GLOSSARY.md) and use its terms in code, issues and commits.
-- Check the [planning map](https://github.com/devendra-nationalwala/glasswipe/issues/1) before proposing a feature; it may already be decided or ruled out of scope.
-- Run `swift test` before committing. New removal logic needs a test that proves it stays inside its temp folder.
-- To add a Junk location, add a rule to `junk-rules.json`; the `noRuleTargetsAProtectedLocation` test checks it against the Safety Gate.
-- Commits: plain, descriptive messages; no co-author trailers or tool attribution lines.
-
-## Forking
-
-Everything works the same in a fork. Replace `devendra-nationalwala/glasswipe` in `AGENTS.md`, `docs/agents/issue-tracker.md` and the links above with your own repo, and recreate the `wayfinder:*` labels if you want to use the planning workflow.
+Bug reports and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) to build from source, run the tests and learn how the code is organised.
 
 ## Disclaimer
 

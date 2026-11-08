@@ -94,8 +94,7 @@ struct StartupItemsView: View {
     }
 
     private func reload() {
-        let loaded = StartupItems.scan()
-        items = loaded
+        items = Demo.isOn ? Demo.startupItems : StartupItems.scan()
     }
 
     private func run(_ change: @escaping @Sendable () throws -> Void) {

@@ -46,6 +46,7 @@ final class ScanSession {
 
     func scan() async {
         guard let model else { return }
+        if Demo.isOn, case .junk = kind { return }
         phase = .scanning("Starting…", 0)
         model.refreshAccess()
         let found: [ScanItem]
@@ -104,7 +105,8 @@ final class ScanSession {
     }
 
     func clean() async {
-        guard let model else { return }
+        // Demo mode never removes anything.
+        guard let model, !Demo.isOn else { return }
         let chosen = selectedItems
         guard !chosen.isEmpty else { return }
         phase = .cleaning(0)

@@ -10,6 +10,16 @@ public struct CleanupResult: Sendable, Codable, Identifiable {
     public let method: String
     public let succeeded: Bool
     public let error: String?
+
+    public init(date: Date, title: String, path: String, size: Int64, method: String, succeeded: Bool, error: String?) {
+        self.date = date
+        self.title = title
+        self.path = path
+        self.size = size
+        self.method = method
+        self.succeeded = succeeded
+        self.error = error
+    }
 }
 
 /// Performs the actual changes on disk. Swappable so tests never touch real files.

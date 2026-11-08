@@ -52,7 +52,7 @@ struct HistoryView: View {
         }
         .padding(.horizontal, 24)
         .padding(.top, 8)
-        .task { entries = CleanupLog.standard.read() }
+        .task { entries = Demo.isOn ? Demo.history : CleanupLog.standard.read() }
     }
 }
 

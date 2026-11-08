@@ -87,6 +87,7 @@ final class AppModel {
         leftovers = ScanSession(kind: .leftovers)
         largeFiles = ScanSession(kind: .largeFiles)
         for session in [storage, developer, leftovers, largeFiles] { session.model = self }
+        if Demo.isOn { Demo.load(into: self) }
         startMonitoring()
     }
 

@@ -4,7 +4,8 @@ Native macOS cleaner (Swift + SwiftUI, Liquid Glass, macOS 26+). Planning is tra
 
 ## Working rules
 
-- **Keep `README.md` current.** When a decision changes requirements, setup, permissions, features, layout or how to contribute, update the README in the same change so anyone forking the repo can follow it.
+- **Keep the docs current.** `README.md` is for people who install and use the app (download, install, usage, safety, FAQ, disclaimer); `CONTRIBUTING.md` is for building, testing, layout and contribution rules. Update whichever a change affects, in the same change, so anyone forking the repo can follow it.
+- **Screenshots:** regenerate with `open -n build/Glasswipe.app --env GLASSWIPE_DEMO_HIDE=<names> --args --demo --snapshot=build/shots`, then resize into `docs/screenshots/` (`sips -Z 1600`). Demo mode uses sample data; never commit screenshots of real machine data.
 - **Commits and PRs:** plain, descriptive messages. No co-author trailers or tool attribution lines.
 - Use the vocabulary in `GLOSSARY.md`.
 

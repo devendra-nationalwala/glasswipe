@@ -20,6 +20,18 @@ public struct StartupItem: Identifiable, Sendable, Hashable {
     public let keepAlive: Bool
     public let isEnabled: Bool
     public let isLoaded: Bool
+    public init(label: String, plist: URL, scope: Scope, program: String?, runAtLoad: Bool, keepAlive: Bool,
+                isEnabled: Bool, isLoaded: Bool) {
+        self.label = label
+        self.plist = plist
+        self.scope = scope
+        self.program = program
+        self.runAtLoad = runAtLoad
+        self.keepAlive = keepAlive
+        self.isEnabled = isEnabled
+        self.isLoaded = isLoaded
+    }
+
     /// The program it launches no longer exists.
     public var isBroken: Bool { program.map { !FileManager.default.fileExists(atPath: $0) } ?? false }
 }

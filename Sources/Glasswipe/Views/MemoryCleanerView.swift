@@ -148,8 +148,11 @@ struct MemoryCleanerView: View {
     }
 
     private func refresh() async {
-        apps = AppMemory.usage()
+        apps = AppMemory.usage().filter { !Demo.hides($0.name) && !(Demo.isOn && $0.bundleID == Bundle.main.bundleIdentifier) }
         selection = selection.intersection(Set(apps.map(\.pid)))
+        if Demo.isOn && selection.isEmpty {
+            selection = Set(apps.filter { $0.isBackgroundCandidate && $0.footprint >= 500 * 1_048_576 }.map(\.pid))
+        }
     }
 
     private func freeUp() async {

@@ -7,6 +7,13 @@ public struct SpaceNode: Identifiable, Sendable, Hashable {
     public let name: String
     public let size: Int64
     public let isDirectory: Bool
+
+    public init(url: URL, name: String, size: Int64, isDirectory: Bool) {
+        self.url = url
+        self.name = name
+        self.size = size
+        self.isDirectory = isDirectory
+    }
 }
 
 public enum SpaceLens {

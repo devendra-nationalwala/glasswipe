@@ -18,6 +18,9 @@ struct GlasswipeApp: App {
                 .frame(minWidth: 900, minHeight: 600)
         }
         .defaultSize(width: 1100, height: 720)
+        // Always open the window at launch, even if it was closed when the app last quit.
+        .defaultLaunchBehavior(.presented)
+        .restorationBehavior(.disabled)
         .commands {
             CommandGroup(after: .newItem) {
                 Button("Smart Scan") {

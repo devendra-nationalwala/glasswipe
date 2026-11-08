@@ -123,8 +123,11 @@ struct UninstallerView: View {
 
     private func load() async {
         loading = true
-        apps = await AppInventory.scan()
+        apps = await AppInventory.scan().filter { !Demo.hides($0.name) && !Demo.hides($0.bundleID) }
         loading = false
+        if Demo.isOn, selected == nil, let sample = apps.first(where: { ["us.zoom.xos", "com.tinyspeck.slackmacgap", "com.spotify.client"].contains($0.bundleID) }) {
+            select(sample)
+        }
     }
 
     private func uninstall(_ session: ScanSession) async {

@@ -294,7 +294,7 @@ struct FullDiskAccessBanner: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        if !model.hasFullDiskAccess {
+        if !model.hasFullDiskAccess && !Demo.isOn {
             HStack(spacing: 12) {
                 Image(systemName: "lock.shield").font(.title2).foregroundStyle(.orange)
                 VStack(alignment: .leading, spacing: 2) {

@@ -22,7 +22,7 @@ struct OverviewView: View {
 
                 smartScanCard
 
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 220), spacing: 16)], spacing: 16) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 16)], spacing: 16) {
                     ForEach([Module.storage, .developer, .uninstaller, .leftovers, .spaceLens, .largeFiles, .startup, .memory]) { m in
                         Button { model.selection = m } label: { ModuleTile(module: m) }.buttonStyle(.plain)
                     }
@@ -48,6 +48,8 @@ struct OverviewView: View {
                     Text("\(free.formattedBytes) available").font(.title3.monospacedDigit())
                     Text("of \(total.formattedBytes)").foregroundStyle(.secondary)
                 }
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
                 Spacer()
             }
         }
@@ -63,12 +65,17 @@ struct OverviewView: View {
                 }
                 .frame(width: 86, height: 86)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Memory pressure").font(.headline)
+                    HStack {
+                        Text("Memory pressure").font(.headline)
+                        Spacer()
+                        Button("Free Up") { model.selection = .memory }.buttonStyle(.glass).controlSize(.small)
+                    }
                     Text("\(m.used.formattedBytes) used").font(.title3.monospacedDigit())
-                    Text("Swap \(m.swapUsed.formattedBytes) · Compressed \(m.compressed.formattedBytes)").foregroundStyle(.secondary)
+                    Text("Swap \(m.swapUsed.formattedBytes)").foregroundStyle(.secondary)
+                    Text("Compressed \(m.compressed.formattedBytes)").foregroundStyle(.secondary)
                 }
-                Spacer()
-                Button("Free Up") { model.selection = .memory }.buttonStyle(.glass)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
             }
         }
     }
@@ -127,7 +134,7 @@ struct ModuleTile: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: module.symbol).font(.title2).foregroundStyle(.tint).frame(width: 32)
-            Text(module.title).font(.headline)
+            Text(module.title).font(.headline).lineLimit(1)
             Spacer()
             Image(systemName: "chevron.right").foregroundStyle(.tertiary)
         }

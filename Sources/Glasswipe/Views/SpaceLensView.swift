@@ -54,7 +54,7 @@ struct SpaceLensView: View {
                     Text(hovered.size.formattedBytes).monospacedDigit().foregroundStyle(.secondary)
                     Text(hovered.isDirectory ? "Click to open" : "Click to show in Finder").foregroundStyle(.tertiary)
                 } else {
-                    Text("\(nodes.reduce(0) { $0 + $1.size }.formattedBytes) in \(current.path)").foregroundStyle(.secondary)
+                    Text("\(nodes.reduce(0) { $0 + $1.size }.formattedBytes) in \(current.path.replacingOccurrences(of: NSHomeDirectory(), with: "~"))").foregroundStyle(.secondary)
                     if loading { ProgressView().controlSize(.small); Text("still measuring…").foregroundStyle(.tertiary) }
                 }
                 Spacer()
@@ -74,6 +74,7 @@ struct SpaceLensView: View {
 
     private func load() async {
         let target = current
+        if Demo.isOn { nodes = path.count == 1 ? Demo.spaceNodes : []; return }
         if let cached = cache[target] { nodes = cached; return }
         loading = true
         nodes = []
