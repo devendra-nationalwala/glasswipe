@@ -126,6 +126,8 @@ struct ContentView: View {
                         session: model.developer)
         case .memory:
             MemoryCleanerView()
+        case .cpu:
+            CPUView()
         case .uninstaller:
             UninstallerView()
         case .leftovers:

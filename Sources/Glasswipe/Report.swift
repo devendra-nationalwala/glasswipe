@@ -2,7 +2,7 @@ import AppKit
 import Foundation
 import GlasswipeCore
 
-/// `Glasswipe --report <junk|developer|leftovers|apps|large|startup|memory>` prints what a Scan would find
+/// `Glasswipe --report <junk|developer|leftovers|apps|large|startup|memory|cpu>` prints what a Scan would find
 /// and exits. Read-only: nothing is removed.
 enum Report {
     static var requested: String? {
@@ -57,8 +57,23 @@ enum Report {
                 for app in await MainActor.run(body: { AppMemory.usage() }).prefix(15) {
                     lines.append("\(app.footprint.formattedBytes)\t\(app.name)\t\(app.processCount) processes")
                 }
+            case "cpu":
+                let info = CPUInfo.current
+                let sampler = CPUSampler()
+                let apps = await MainActor.run { AppCPUSampler() }
+                _ = sampler.sample()
+                _ = await MainActor.run { apps.sample() }
+                try? await Task.sleep(for: .seconds(1))
+                let c = sampler.sample()
+                lines.append("\(info.name): \(info.performanceCores) performance + \(info.efficiencyCores) efficiency, \(info.logicalCores) logical")
+                lines.append(String(format: "user %.1f%% system %.1f%% load %@ thermal %@", c.user, c.system,
+                                    c.loadAverage.map { String(format: "%.2f", $0) }.joined(separator: " "), c.thermal.rawValue))
+                lines.append("cores " + c.cores.map { String(Int($0)) }.joined(separator: " "))
+                for row in await MainActor.run(body: { apps.sample() }).prefix(15) {
+                    lines.append(String(format: "%.1f%%\t%@\t%d processes", row.percent, row.name, row.processCount))
+                }
             default:
-                lines.append("Unknown report \(kind). Use junk, developer, leftovers, apps, large, startup, memory or footprint <app>.")
+                lines.append("Unknown report \(kind). Use junk, developer, leftovers, apps, large, startup, memory, cpu or footprint <app>.")
             }
             for item in items {
                 let flags = [item.selectedByDefault ? "selected" : "unticked", item.inUseBy.map { "in use: \($0)" }]

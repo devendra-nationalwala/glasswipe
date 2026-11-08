@@ -8,6 +8,8 @@ public struct ProcessInfoSnapshot: Sendable, Hashable {
     public let path: String
     /// Physical memory footprint in bytes (what Activity Monitor calls "Memory").
     public let footprint: UInt64
+    /// CPU time used since the process started, in nanoseconds.
+    public let cpuTime: UInt64
 }
 
 public enum ProcessList {
@@ -22,11 +24,13 @@ public enum ProcessList {
         guard filled > 0 else { return [] }
         return pids.prefix(Int(filled)).compactMap { pid in
             guard pid > 0, let path = path(of: pid) else { return nil }
+            let usage = usage(of: pid)
             return ProcessInfoSnapshot(
                 pid: pid,
                 name: URL(fileURLWithPath: path).lastPathComponent,
                 path: path,
-                footprint: footprint(of: pid) ?? 0
+                footprint: usage?.ri_phys_footprint ?? 0,
+                cpuTime: usage.map { nanoseconds($0.ri_user_time + $0.ri_system_time) } ?? 0
             )
         }
     }
@@ -39,12 +43,24 @@ public enum ProcessList {
     }
 
     public static func footprint(of pid: pid_t) -> UInt64? {
+        usage(of: pid)?.ri_phys_footprint
+    }
+
+    static func usage(of pid: pid_t) -> rusage_info_v4? {
         var info = rusage_info_v4()
         let result = withUnsafeMutablePointer(to: &info) { pointer in
             pointer.withMemoryRebound(to: rusage_info_t?.self, capacity: 1) {
                 proc_pid_rusage(pid, RUSAGE_INFO_V4, $0)
             }
         }
-        return result == 0 ? info.ri_phys_footprint : nil
+        return result == 0 ? info : nil
+    }
+
+    /// rusage CPU times are in Mach time units, which are not nanoseconds on Apple silicon.
+    static func nanoseconds(_ machTime: UInt64) -> UInt64 {
+        var timebase = mach_timebase_info_data_t()
+        mach_timebase_info(&timebase)
+        guard timebase.denom > 0 else { return machTime }
+        return machTime * UInt64(timebase.numer) / UInt64(timebase.denom)
     }
 }

@@ -407,6 +407,42 @@ struct SystemTests {
         #expect(s.used <= s.total)
     }
 
+    @Test func cpuLoadIsComputedFromTickDeltas() {
+        let old = [CPUSampler.Ticks(user: 100, system: 50, idle: 850, nice: 0), CPUSampler.Ticks(user: 0, system: 0, idle: 0, nice: 0)]
+        let new = [CPUSampler.Ticks(user: 160, system: 70, idle: 870, nice: 0), CPUSampler.Ticks(user: 0, system: 0, idle: 100, nice: 0)]
+        let load = CPUSampler.load(from: old, to: new)
+        #expect(load.cores == [80, 0])
+        #expect(abs(load.user - 30) < 0.001)
+        #expect(abs(load.system - 10) < 0.001)
+    }
+
+    @Test func cpuLoadSurvivesCounterWraparound() {
+        let old = [CPUSampler.Ticks(user: UInt32.max - 9, system: 0, idle: 0, nice: 0)]
+        let new = [CPUSampler.Ticks(user: 10, system: 0, idle: 20, nice: 0)]
+        #expect(CPUSampler.load(from: old, to: new).cores == [50])
+    }
+
+    @Test func cpuSamplerReadsEveryCore() {
+        let sampler = CPUSampler()
+        _ = sampler.sample()
+        let snapshot = sampler.sample()
+        #expect(snapshot.cores.count == CPUInfo.current.logicalCores)
+        #expect((0...100).contains(snapshot.total))
+        #expect(snapshot.loadAverage.count == 3)
+    }
+
+    @Test func helpersAreGroupedUnderTheirOutermostApp() {
+        #expect(AppCPUSampler.bundlePath(of: "/Applications/Browser.app/Contents/Frameworks/Helper.app/Contents/MacOS/Helper")
+                == "/Applications/Browser.app")
+        #expect(AppCPUSampler.bundlePath(of: "/usr/bin/python3") == nil)
+    }
+
+    @Test func processCPUPercentIsPerCore() {
+        #expect(AppCPUSampler.percent(previous: 1_000, current: 3_001_000, elapsed: 2_000_000) == 150)
+        #expect(AppCPUSampler.percent(previous: nil, current: 5_000, elapsed: 1_000) == 0, "new processes start at 0")
+        #expect(AppCPUSampler.percent(previous: 9_000, current: 5_000, elapsed: 1_000) == 0, "a reused pid never goes negative")
+    }
+
     @Test func processListSeesItself() {
         let me = ProcessInfo.processInfo.processIdentifier
         #expect(ProcessList.all().contains { $0.pid == me && $0.footprint > 0 })

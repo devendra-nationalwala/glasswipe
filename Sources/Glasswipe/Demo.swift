@@ -219,6 +219,28 @@ enum Demo {
                               level: .normal, date: Date())
     }
 
+    static let cpuInfo = CPUInfo(name: "Apple M3 Pro", logicalCores: 12, performanceCores: 6, efficiencyCores: 6)
+
+    static var cpu: CPUSnapshot {
+        let t = Double(tick)
+        let cores = (0..<cpuInfo.logicalCores).map { i in max(2, min(96, 22 + 18 * sin(t / 2 + Double(i)) + (i < 6 ? 10 : 0))) }
+        return CPUSnapshot(user: 14 + 4 * sin(t / 3), system: 6 + 2 * cos(t / 4), cores: cores,
+                           loadAverage: [3.42, 2.87, 2.51], thermal: .nominal, uptime: 3 * 86_400 + 5 * 3_600)
+    }
+
+    static var cpuApps: [AppCPUUsage] {
+        let percents: [Double] = [86.4, 41.2, 23.7, 12.9, 6.1, 3.4, 1.8, 0.9, 0.4, 0.2]
+        let apps = fakeApps.enumerated().map { i, a in
+            AppCPUUsage(pid: pid_t(90_000 + i), name: a.name, path: bundle(for: a).path, isApp: true,
+                        percent: percents[i % percents.count], processCount: a.processes, canQuit: true)
+        }
+        let tools = [("node", 34.5, 3), ("swift-frontend", 18.2, 2), ("python3", 4.6, 1)].enumerated().map { i, t in
+            AppCPUUsage(pid: pid_t(91_000 + i), name: t.0, path: "/usr/local/bin/\(t.0)", isApp: false,
+                        percent: t.1, processCount: t.2, canQuit: false)
+        }
+        return (apps + tools).sorted { $0.percent > $1.percent }
+    }
+
     static var stats: SystemStats {
         SystemStats(cpuPercent: 18, diskFree: 214 * GB, diskTotal: 1_000 * GB, batteryPercent: 82, isCharging: false)
     }

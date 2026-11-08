@@ -6,7 +6,7 @@ import UserNotifications
 
 /// Sidebar destinations.
 enum Module: String, CaseIterable, Identifiable, Hashable {
-    case overview, storage, developer, memory, uninstaller, leftovers, startup, spaceLens, largeFiles, history
+    case overview, storage, developer, memory, cpu, uninstaller, leftovers, startup, spaceLens, largeFiles, history
 
     var id: String { rawValue }
 
@@ -16,6 +16,7 @@ enum Module: String, CaseIterable, Identifiable, Hashable {
         case .storage: "Storage Cleaner"
         case .developer: "Developer Junk"
         case .memory: "Memory Cleaner"
+        case .cpu: "CPU"
         case .uninstaller: "Uninstaller"
         case .leftovers: "Leftovers"
         case .startup: "Startup Items"
@@ -31,6 +32,7 @@ enum Module: String, CaseIterable, Identifiable, Hashable {
         case .storage: "externaldrive.badge.minus"
         case .developer: "hammer"
         case .memory: "memorychip"
+        case .cpu: "cpu"
         case .uninstaller: "trash.square"
         case .leftovers: "shippingbox"
         case .startup: "power.circle"
@@ -42,7 +44,7 @@ enum Module: String, CaseIterable, Identifiable, Hashable {
 
     static let sections: [(String, [Module])] = [
         ("", [.overview]),
-        ("Clean", [.storage, .developer, .memory]),
+        ("Clean", [.storage, .developer, .memory, .cpu]),
         ("Apps", [.uninstaller, .leftovers, .startup]),
         ("Files", [.spaceLens, .largeFiles]),
         ("", [.history]),
@@ -60,7 +62,11 @@ final class AppModel {
     var memory = Demo.isOn ? Demo.memory : MemorySampler.sample()
     var memoryHistory: [MemorySnapshot] = []
     var stats: SystemStats?
+    var cpu = Demo.isOn ? Demo.cpu : CPUSnapshot(user: 0, system: 0, cores: [], loadAverage: [0, 0, 0], thermal: .nominal, uptime: 0)
+    var cpuHistory: [CPUSnapshot] = []
+    let cpuInfo = Demo.isOn ? Demo.cpuInfo : CPUInfo.current
     private let statsSampler = SystemStatsSampler()
+    private let cpuSampler = CPUSampler()
     private var timer: Timer?
     private var lastAlertLevel: MemorySnapshot.PressureLevel = .normal
 
@@ -108,6 +114,9 @@ final class AppModel {
         memoryHistory.append(memory)
         if memoryHistory.count > 90 { memoryHistory.removeFirst(memoryHistory.count - 90) }
         stats = Demo.isOn ? Demo.stats : statsSampler.sample()
+        cpu = Demo.isOn ? Demo.cpu : cpuSampler.sample()
+        cpuHistory.append(cpu)
+        if cpuHistory.count > 90 { cpuHistory.removeFirst(cpuHistory.count - 90) }
         if memory.level == .critical, lastAlertLevel != .critical, alertOnCriticalPressure { notifyCriticalPressure() }
         lastAlertLevel = memory.level
     }

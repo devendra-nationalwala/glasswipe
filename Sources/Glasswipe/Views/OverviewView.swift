@@ -18,12 +18,13 @@ struct OverviewView: View {
                 HStack(spacing: 16) {
                     diskCard
                     memoryCard
+                    cpuCard
                 }
 
                 smartScanCard
 
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 16)], spacing: 16) {
-                    ForEach([Module.storage, .developer, .uninstaller, .leftovers, .spaceLens, .largeFiles, .startup, .memory]) { m in
+                    ForEach([Module.storage, .developer, .uninstaller, .leftovers, .spaceLens, .largeFiles, .startup, .memory, .cpu]) { m in
                         Button { model.selection = m } label: { ModuleTile(module: m) }.buttonStyle(.plain)
                     }
                 }
@@ -36,47 +37,34 @@ struct OverviewView: View {
         let total = model.stats?.diskTotal ?? 1
         let free = model.stats?.diskFree ?? 0
         let used = Double(total - free) / Double(max(total, 1))
-        return Card {
-            HStack(spacing: 18) {
-                ZStack {
-                    RingGauge(fraction: used, color: used > 0.9 ? .red : .accentColor)
-                    Text("\(Int(used * 100))%").font(.title3.bold().monospacedDigit())
-                }
-                .frame(width: 86, height: 86)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Storage").font(.headline)
-                    Text("\(free.formattedBytes) available").font(.title3.monospacedDigit())
-                    Text("of \(total.formattedBytes)").foregroundStyle(.secondary)
-                }
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-                Spacer()
-            }
+        return GaugeCard(title: "Storage", fraction: used, color: used > 0.9 ? .red : .accentColor, value: "\(Int(used * 100))%") {
+            Text(free.formattedBytes).font(.headline.monospacedDigit())
+            Text("free of \(total.formattedBytes)").foregroundStyle(.secondary)
+        } action: {
+            Button("Clean") { model.selection = .storage }
         }
     }
 
     private var memoryCard: some View {
         let m = model.memory
-        return Card {
-            HStack(spacing: 18) {
-                ZStack {
-                    RingGauge(fraction: Double(m.pressurePercent) / 100, color: m.level.color)
-                    Text("\(m.pressurePercent)%").font(.title3.bold().monospacedDigit())
-                }
-                .frame(width: 86, height: 86)
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("Memory pressure").font(.headline)
-                        Spacer()
-                        Button("Free Up") { model.selection = .memory }.buttonStyle(.glass).controlSize(.small)
-                    }
-                    Text("\(m.used.formattedBytes) used").font(.title3.monospacedDigit())
-                    Text("Swap \(m.swapUsed.formattedBytes)").foregroundStyle(.secondary)
-                    Text("Compressed \(m.compressed.formattedBytes)").foregroundStyle(.secondary)
-                }
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-            }
+        return GaugeCard(title: "Memory", fraction: Double(m.pressurePercent) / 100, color: m.level.color,
+                         value: "\(m.pressurePercent)%") {
+            Text("\(m.used.formattedBytes) used").font(.headline.monospacedDigit())
+            Text("Swap \(m.swapUsed.formattedBytes)").foregroundStyle(.secondary)
+            Text(m.level.rawValue.capitalized).foregroundStyle(m.level.color)
+        } action: {
+            Button("Free Up") { model.selection = .memory }
+        }
+    }
+
+    private var cpuCard: some View {
+        let c = model.cpu
+        return GaugeCard(title: "CPU", fraction: c.total / 100, color: CPUView.color(for: c.total), value: "\(Int(c.total))%") {
+            Text("Load \(c.loadAverage.first.map { String(format: "%.2f", $0) } ?? "–")").font(.headline.monospacedDigit())
+            Text("\(model.cpuInfo.logicalCores) cores").foregroundStyle(.secondary)
+            Text(c.thermal.label).foregroundStyle(c.thermal.color)
+        } action: {
+            Button("Details") { model.selection = .cpu }
         }
     }
 
@@ -113,6 +101,39 @@ struct OverviewView: View {
                     }
                     .buttonStyle(.glassProminent)
                     .controlSize(.large)
+                }
+            }
+        }
+    }
+}
+
+/// Overview card: title and action on top, a ring gauge with details below.
+struct GaugeCard<Details: View, Action: View>: View {
+    let title: String
+    let fraction: Double
+    let color: Color
+    let value: String
+    @ViewBuilder var details: Details
+    @ViewBuilder var action: Action
+
+    var body: some View {
+        Card {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text(title).font(.headline).lineLimit(1)
+                    Spacer(minLength: 8)
+                    action.buttonStyle(.glass).controlSize(.small)
+                }
+                HStack(spacing: 14) {
+                    ZStack {
+                        RingGauge(fraction: fraction, color: color, lineWidth: 9)
+                        Text(value).font(.headline.monospacedDigit())
+                    }
+                    .frame(width: 66, height: 66)
+                    VStack(alignment: .leading, spacing: 2) { details }
+                        .font(.callout)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
                 }
             }
         }

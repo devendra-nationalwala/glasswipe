@@ -23,6 +23,7 @@ macOS 26 (Tahoe) or later · Apple Silicon · [All releases](https://github.com/
 | **Storage Cleaner** | Finds caches, logs, temporary files, browser caches and the Trash that are safe to remove. |
 | **Developer Junk** | Clears Xcode build data, `node_modules`, and caches from npm, pip, uv, Homebrew, Docker and more, using each tool's own clean command. |
 | **Memory Cleaner** | Shows real memory pressure and frees memory by quitting the apps you choose. No fake "RAM boost". |
+| **CPU** | Live load for every core (performance and efficiency), load average, temperature state, and which apps and processes keep the processor busy. |
 | **Uninstaller** | Removes an app together with its preferences, caches, containers and startup items. |
 | **Leftovers** | Finds files left behind by apps you already deleted. |
 | **Space Lens** | A map of what is taking up your disk. Click to dig into any folder. |
@@ -41,6 +42,9 @@ macOS 26 (Tahoe) or later · Apple Silicon · [All releases](https://github.com/
 
 **Memory Cleaner:** apps grouped with their helper processes, sorted by how much memory they really use.
 ![Memory Cleaner](docs/screenshots/memory.png)
+
+**CPU:** every core at a glance, and the apps and processes using the processor right now.
+![CPU](docs/screenshots/cpu.png)
 
 **Uninstaller:** the app and every file it created, matched by its exact identifiers.
 ![Uninstaller](docs/screenshots/uninstaller.png)
@@ -93,6 +97,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 **To uninstall an app:** open **Uninstaller**, pick the app, check the list of files, and click **Uninstall**. The app is quit first if it's running.
 
 **To free memory:** open **Memory Cleaner**, tick the apps you can close (or click *Select background apps over 500 MB*), and click **Free Up Memory**. Apps are asked to quit normally, so they can save your work.
+
+**To see what's using your processor:** open **CPU**. Apps and their helper processes are grouped and ranked by CPU use (100% means one full core, as in Activity Monitor). Quit a busy app from its ⋯ menu.
 
 **Menu bar:** Glasswipe keeps running in the menu bar after you close its window. Click the ✨ icon for live stats and quick actions; choose **Quit** there to exit completely.
 
