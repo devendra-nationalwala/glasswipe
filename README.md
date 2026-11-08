@@ -156,7 +156,9 @@ Quit it from the menu bar, then drag `/Applications/Glasswipe.app` to the Trash.
 
 ## Contributing
 
-Bug reports and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) to build from source, run the tests and learn how the code is organised.
+If Glasswipe saved you some space, please ⭐ **star this repository**. There's a **Star on GitHub** button in the app's sidebar, menu bar panel and Help menu.
+
+Bug reports (Help → Report a Problem) and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) to build from source, run the tests and learn how the code is organised.
 
 ## Disclaimer
 

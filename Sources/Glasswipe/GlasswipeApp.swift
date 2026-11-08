@@ -33,6 +33,13 @@ struct GlasswipeApp: App {
                 }
                 .keyboardShortcut("r", modifiers: [.command, .shift])
             }
+            CommandGroup(replacing: .help) {
+                Button("Star Glasswipe on GitHub…") { Project.star() }
+                Button("Report a Problem…") { NSWorkspace.shared.open(Project.issues) }
+                Button("Check for Updates…") { NSWorkspace.shared.open(Project.releases) }
+                Divider()
+                Button("Glasswipe on GitHub") { NSWorkspace.shared.open(Project.repository) }
+            }
             CommandMenu("Go") {
                 ForEach(Array(Module.allCases.enumerated()), id: \.element) { index, module in
                     Button(module.title) { model.selection = module }
@@ -76,6 +83,13 @@ struct ContentView: View {
                 }
             }
             .navigationSplitViewColumnWidth(min: 200, ideal: 220)
+            .safeAreaInset(edge: .bottom) {
+                StarButton()
+                    .buttonStyle(.glass)
+                    .controlSize(.small)
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 12)
+            }
         } detail: {
             detail(for: model.selection ?? .overview)
                 .scrollEdgeEffectStyle(.soft, for: .top)
@@ -134,6 +148,7 @@ struct MenuBarView: View {
                 Image(systemName: "sparkles").foregroundStyle(.tint)
                 Text("Glasswipe").font(.headline)
                 Spacer()
+                StarButton(compact: true).buttonStyle(.borderless)
             }
             HStack(spacing: 12) {
                 meter("Memory", value: Double(m.pressurePercent) / 100, text: "\(m.pressurePercent)%", color: m.level.color)

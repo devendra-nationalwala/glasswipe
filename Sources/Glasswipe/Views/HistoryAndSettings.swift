@@ -77,6 +77,13 @@ struct SettingsView: View {
                 Section("Memory") {
                     Toggle("Notify me when memory pressure is critical", isOn: $model.alertOnCriticalPressure)
                 }
+                Section("Glasswipe") {
+                    LabeledContent("Version", value: Project.version)
+                    LabeledContent("Enjoying Glasswipe?") { StarButton() }
+                    LabeledContent("Found a bug?") {
+                        Button("Report a Problem") { NSWorkspace.shared.open(Project.issues) }
+                    }
+                }
                 Section("Safety") {
                     LabeledContent("Junk rules") {
                         Text(model.rules.map { "\($0.rules.count) rules loaded" } ?? "Not loaded — cleanup is disabled")
@@ -90,7 +97,7 @@ struct SettingsView: View {
             ExclusionsSettings()
                 .tabItem { Label("Exclusions", systemImage: "hand.raised") }
         }
-        .frame(width: 520, height: 380)
+        .frame(width: 520, height: 480)
     }
 }
 
