@@ -33,6 +33,9 @@ struct GlasswipeApp: App {
                 }
                 .keyboardShortcut("r", modifiers: [.command, .shift])
             }
+            CommandGroup(replacing: .appInfo) {
+                Button("About Glasswipe") { Project.showAbout() }
+            }
             CommandGroup(replacing: .help) {
                 Button("Star Glasswipe on GitHub…") { Project.star() }
                 Button("Buy Me a Coffee…") { Project.buyCoffee() }

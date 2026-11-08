@@ -79,6 +79,13 @@ struct SettingsView: View {
                 }
                 Section("Glasswipe") {
                     LabeledContent("Version", value: Project.version)
+                    LabeledContent("Author") {
+                        HStack(spacing: 6) {
+                            Text(Project.author)
+                            Link(destination: Project.authorProfile) { Image(systemName: "arrow.up.right.square") }
+                                .help("Open GitHub profile")
+                        }
+                    }
                     LabeledContent("Enjoying Glasswipe?") { StarButton() }
                     LabeledContent("Want to support it?") { CoffeeButton() }
                     LabeledContent("Found a bug?") {

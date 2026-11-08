@@ -46,7 +46,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>LSMinimumSystemVersion</key><string>26.0</string>
   <key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
   <key>NSHighResolutionCapable</key><true/>
-  <key>NSHumanReadableCopyright</key><string>MIT License</string>
+  <key>NSHumanReadableCopyright</key><string>© $(date +%Y) Devendra Nationalwala</string>
   <key>NSAppleEventsUsageDescription</key><string>Glasswipe asks for your administrator password through macOS to clean system folders.</string>
 </dict>
 </plist>

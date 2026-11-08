@@ -176,4 +176,12 @@ If you do not accept these terms, do not build, install or run Glasswipe.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) © 2026 Devendra Nationalwala
+
+---
+
+<div align="center">
+
+Built by **[Devendra Nationalwala](https://github.com/devendra-nationalwala)** · If Glasswipe helped, please ⭐ the repo
+
+</div>

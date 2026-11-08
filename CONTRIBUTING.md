@@ -86,6 +86,6 @@ Planning uses a **wayfinder map**: one GitHub issue labelled `wayfinder:map` tha
 
 ## Forking
 
-Everything works the same in a fork. Replace `devendra-nationalwala/glasswipe` in `Sources/Glasswipe/Project.swift`, `AGENTS.md`, `docs/agents/issue-tracker.md`, `scripts/release.sh`, `scripts/make-dmg.sh` and the README links with your own repo, and recreate the `wayfinder:*` labels if you want to use the planning workflow. Replace the donation link (`Project.donate` in `Project.swift`, `.github/FUNDING.yml`, the README and `scripts/release.sh`) with your own, or remove it.
+Everything works the same in a fork. Replace `devendra-nationalwala/glasswipe` and the author name in `Sources/Glasswipe/Project.swift` and `scripts/build-app.sh` (copyright line), `AGENTS.md`, `docs/agents/issue-tracker.md`, `scripts/release.sh`, `scripts/make-dmg.sh` and the README links with your own repo, and recreate the `wayfinder:*` labels if you want to use the planning workflow. Replace the donation link (`Project.donate` in `Project.swift`, `.github/FUNDING.yml`, the README and `scripts/release.sh`) with your own, or remove it.
 
 By contributing you agree your contributions are released under the [MIT License](LICENSE) and that the [disclaimer](README.md#disclaimer) applies to them.
